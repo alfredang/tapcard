@@ -1,0 +1,365 @@
+// Digital Business Card + CRM — full data model.
+// The core (User, Card, Lead, Contact, Deal, AnalyticsEvent) is wired end-to-end.
+// Org/Task/Appointment/Activity back the scaffolded modules so later phases need
+// no schema churn.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ──────────────────────────────────────────────────────────────────
+
+enum Theme {
+  CORPORATE
+  MODERN
+  MINIMALIST
+  DARK
+  CREATIVE
+  LUXURY
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum AnalyticsEventType {
+  VIEW
+  QR_SCAN
+  WHATSAPP_CLICK
+  EMAIL_CLICK
+  WEBSITE_CLICK
+  PHONE_CLICK
+  SOCIAL_CLICK
+  VCF_DOWNLOAD
+  LEAD_SUBMIT
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CONVERTED
+  ARCHIVED
+}
+
+enum DealStage {
+  NEW_LEAD
+  CONTACTED
+  QUALIFIED
+  PROPOSAL
+  NEGOTIATION
+  WON
+  LOST
+}
+
+enum ActivityType {
+  CALL
+  EMAIL
+  WHATSAPP
+  MEETING
+  NOTE
+}
+
+enum TaskType {
+  FOLLOW_UP
+  REMINDER
+  MEETING
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum AppointmentStatus {
+  REQUESTED
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+// ─── Auth.js ────────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String? // bcrypt hash; null for OAuth-only accounts
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts     Account[]
+  sessions     Session[]
+  cards        Card[]
+  leads        Lead[]
+  contacts     Contact[]
+  deals        Deal[]
+  tasks        Task[]
+  memberships  Membership[]
+  appointments Appointment[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model OtpCode {
+  id        String   @id @default(cuid())
+  email     String
+  codeHash  String
+  expires   DateTime
+  consumed  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
+// ─── Teams / White-label (scaffold) ────────────────────────────────────────
+
+model Organization {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  logo         String?
+  primaryColor String?  @default("#7c5cff")
+  customDomain String?  @unique
+  createdAt    DateTime @default(now())
+
+  memberships Membership[]
+}
+
+model Membership {
+  id      String @id @default(cuid())
+  userId  String
+  orgId   String
+  role    Role   @default(MEMBER)
+
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  org  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, orgId])
+}
+
+// ─── Cards ──────────────────────────────────────────────────────────────────
+
+model Card {
+  id        String  @id @default(cuid())
+  userId    String
+  slug      String  @unique
+  published Boolean @default(false)
+
+  // Personal
+  fullName    String
+  jobTitle    String?
+  company     String?
+  department  String?
+  bio         String? @db.Text
+  about       String? @db.Text
+  tagline     String?
+
+  // Contact
+  mobile      String?
+  officePhone String?
+  whatsapp    String?
+  email       String?
+  website     String?
+  address     String?
+
+  // Social
+  linkedin  String?
+  facebook  String?
+  instagram String?
+  tiktok    String?
+  twitter   String?
+  telegram  String?
+  youtube   String?
+
+  // Media
+  profilePhoto String?
+  companyLogo  String?
+  coverBanner  String?
+  introVideo   String?
+  gallery      Json? // string[] of image URLs
+
+  // Design
+  theme       Theme   @default(MODERN)
+  accentColor String? @default("#7c5cff")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events AnalyticsEvent[]
+  leads  Lead[]
+
+  @@index([userId])
+}
+
+model AnalyticsEvent {
+  id        String             @id @default(cuid())
+  cardId    String
+  type      AnalyticsEventType
+  meta      Json? // e.g. { platform: "linkedin" }
+  referrer  String?
+  userAgent String?
+  createdAt DateTime           @default(now())
+
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@index([cardId, type])
+  @@index([createdAt])
+}
+
+// ─── CRM ────────────────────────────────────────────────────────────────────
+
+model Lead {
+  id      String     @id @default(cuid())
+  userId  String // card owner who captured the lead
+  cardId  String?
+  name    String
+  email   String?
+  phone   String?
+  company String?
+  message String?    @db.Text
+  source  String     @default("card") // card | manual | import
+  status  LeadStatus @default(NEW)
+
+  createdAt DateTime @default(now())
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  card      Card?      @relation(fields: [cardId], references: [id], onDelete: SetNull)
+  contact   Contact?   @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  contactId String?
+
+  @@index([userId, status])
+}
+
+model Contact {
+  id       String  @id @default(cuid())
+  userId   String
+  name     String
+  company  String?
+  position String?
+  email    String?
+  phone    String?
+  whatsapp String?
+  address  String?
+  notes    String? @db.Text
+  tags     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deals      Deal[]
+  activities Activity[]
+  tasks      Task[]
+  leads      Lead[]
+
+  @@index([userId])
+}
+
+model Deal {
+  id        String    @id @default(cuid())
+  userId    String
+  contactId String?
+  title     String
+  value     Float     @default(0)
+  stage     DealStage @default(NEW_LEAD)
+  position  Int       @default(0) // ordering within a stage column
+  notes     String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contact Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  @@index([userId, stage])
+}
+
+model Activity {
+  id        String       @id @default(cuid())
+  contactId String
+  type      ActivityType
+  summary   String
+  detail    String?      @db.Text
+  createdAt DateTime     @default(now())
+
+  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@index([contactId])
+}
+
+model Task {
+  id        String     @id @default(cuid())
+  userId    String
+  contactId String?
+  title     String
+  type      TaskType   @default(FOLLOW_UP)
+  status    TaskStatus @default(TODO)
+  dueAt     DateTime?
+  createdAt DateTime   @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contact Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  @@index([userId, status])
+}
+
+model Appointment {
+  id        String            @id @default(cuid())
+  userId    String
+  name      String
+  email     String?
+  startAt   DateTime
+  endAt     DateTime
+  status    AppointmentStatus @default(REQUESTED)
+  notes     String?           @db.Text
+  createdAt DateTime          @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, startAt])
+}

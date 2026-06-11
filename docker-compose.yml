@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: business_cards
+    ports:
+      # Host 5434 avoids clashing with a locally-installed Postgres on 5432.
+      - "5434:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    restart: unless-stopped
+    # The app profile is opt-in so `docker compose up -d db` only starts Postgres
+    # for local dev. Run the full stack with: docker compose --profile full up --build
+    profiles: ["full"]
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@db:5432/business_cards?schema=public"
+      AUTH_SECRET: "${AUTH_SECRET}"
+      AUTH_TRUST_HOST: "true"
+      NEXT_PUBLIC_APP_URL: "${NEXT_PUBLIC_APP_URL:-http://localhost:3000}"
+      CLAUDE_CODE_OAUTH_TOKEN: "${CLAUDE_CODE_OAUTH_TOKEN:-}"
+      CLAUDE_MODEL: "${CLAUDE_MODEL:-claude-opus-4-8}"
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata:
