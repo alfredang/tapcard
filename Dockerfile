@@ -13,6 +13,10 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npx prisma generate
 ENV NEXT_TELEMETRY_DISABLED=1
+# NEXT_PUBLIC_* vars are inlined into client code at build time, so the public
+# app URL must be present during `next build` (QR codes, share links, OAuth).
+ARG NEXT_PUBLIC_APP_URL
+ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 RUN npm run build
 
 # ─── Runtime ─────────────────────────────────────────────────────────────────
