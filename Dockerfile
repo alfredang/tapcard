@@ -36,8 +36,13 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+# Prisma CLI (+ engines) so the container can apply migrations on startup.
+COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
-CMD ["node", "server.js"]
+# Apply any pending DB migrations (idempotent), then start the server. This
+# ensures the schema exists in the Coolify Postgres before the app serves
+# traffic. `migrate deploy` is safe to re-run on every boot.
+CMD ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy && node server.js"]
