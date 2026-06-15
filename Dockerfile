@@ -42,7 +42,8 @@ COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
-# Apply any pending DB migrations (idempotent), then start the server. This
-# ensures the schema exists in the Coolify Postgres before the app serves
-# traffic. `migrate deploy` is safe to re-run on every boot.
-CMD ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy && node server.js"]
+# Apply any pending DB migrations (idempotent), then start the server. The
+# migrate step is non-blocking (`;`) so a transient DB hiccup can't crash-loop
+# the container; its output is logged for visibility. `migrate deploy` is safe
+# to re-run on every boot.
+CMD ["sh", "-c", "echo '--- prisma migrate deploy ---'; node node_modules/prisma/build/index.js migrate deploy 2>&1; echo '--- migrate exit:' $? '---'; node server.js"]
