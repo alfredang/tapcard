@@ -34,10 +34,10 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-# Prisma CLI (+ engines) so the container can apply migrations on startup.
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
+# Overlay the full node_modules (superset of the standalone-traced set) so the
+# Prisma CLI has all of its transitive deps (e.g. `effect`) available to run
+# `migrate deploy` at startup. Standalone server.js still resolves correctly.
+COPY --from=builder /app/node_modules ./node_modules
 
 EXPOSE 3000
 ENV PORT=3000
