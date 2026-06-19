@@ -11,11 +11,12 @@
 [![Auth.js](https://img.shields.io/badge/Auth.js-v5-000000?logo=auth0&logoColor=white)](https://authjs.dev)
 [![Claude](https://img.shields.io/badge/AI-Claude%20Agent%20SDK-D97757?logo=anthropic&logoColor=white)](https://www.anthropic.com)
 [![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com)
+[![App Store](https://img.shields.io/badge/App%20Store-Available-0D96F6?logo=appstore&logoColor=white)](https://apps.apple.com/us/app/tertiary-tapcard/id6780261599)
 
 **Replace paper business cards with smart digital cards.**
 Create, share, capture leads, and manage customer relationships — all in one platform.
 
-[Report Bug](https://github.com/alfredang/tapcard/issues) · [Request Feature](https://github.com/alfredang/tapcard/issues)
+[Download on the App Store](https://apps.apple.com/us/app/tertiary-tapcard/id6780261599) · [Report Bug](https://github.com/alfredang/tapcard/issues) · [Request Feature](https://github.com/alfredang/tapcard/issues)
 
 </div>
 
@@ -36,33 +37,42 @@ relationship.
 
 ### Key features
 
-| | Feature | Description |
-|---|---|---|
-| 🪪 | **Card Builder** | Canva-style 3-panel editor (content · live preview · design) with instant preview, autosave, 6 themes and accent colors. |
-| 🌐 | **Public cards** | Themed, mobile-first card pages at `/c/<slug>` with Save-Contact, Call, WhatsApp, Email, Website and social links. |
-| 📱 | **QR codes** | Open card / save contact / WhatsApp / email / website, with color customization and PNG / SVG export. |
-| 📇 | **Save to Contacts** | One-tap vCard (VCF) export compatible with iPhone, Android, Google and Outlook. |
-| 💬 | **WhatsApp** | Message, request-a-quote and share deep links built in. |
-| 🎯 | **Lead capture** | Visitors leave their details straight from your card — leads flow into the CRM. |
-| 📊 | **CRM** | Contacts (CRUD, search, CSV export), leads inbox, and a drag-and-drop Kanban sales pipeline (7 stages). |
-| 🤖 | **AI** | Bio / about generation and lead scoring via the **Claude Agent SDK** (subscription — no API key). |
-| 📈 | **Analytics** | Card views, QR scans, downloads and click tracking with an engagement dashboard. |
-| 🔐 | **Auth** | Email + password, email OTP, and Google / Microsoft / LinkedIn SSO (auto-enabled when configured). |
+|     | Feature              | Description                                                                                                              |
+| --- | -------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| 🪪  | **Card Builder**     | Canva-style 3-panel editor (content · live preview · design) with instant preview, autosave, 6 themes and accent colors. |
+| 🌐  | **Public cards**     | Themed, mobile-first card pages at `/c/<slug>` with Save-Contact, Call, WhatsApp, Email, Website and social links.       |
+| 📱  | **QR codes**         | Open card / save contact / WhatsApp / email / website, with color customization and PNG / SVG export.                    |
+| 📇  | **Save to Contacts** | One-tap vCard (VCF) export compatible with iPhone, Android, Google and Outlook.                                          |
+| 💬  | **WhatsApp**         | Message, request-a-quote and share deep links built in.                                                                  |
+| 🎯  | **Lead capture**     | Visitors leave their details straight from your card — leads flow into the CRM.                                          |
+| 📊  | **CRM**              | Contacts (CRUD, search, CSV export), leads inbox, and a drag-and-drop Kanban sales pipeline (7 stages).                  |
+| 🍎  | **iOS app**          | Tertiary Tapcard is available on the App Store for iPhone users.                                                         |
+| 🤖  | **AI**               | Bio / about generation and lead scoring via the **Claude Agent SDK** (subscription — no API key).                        |
+| 📈  | **Analytics**        | Card views, QR scans, downloads and click tracking with an engagement dashboard.                                         |
+| 🔐  | **Auth**             | Email + password, email OTP, and Google / Microsoft / LinkedIn SSO (auto-enabled when configured).                       |
+
+---
+
+## iOS App
+
+Tertiary Tapcard is now available on the App Store:
+
+[Download Tertiary Tapcard on the App Store](https://apps.apple.com/us/app/tertiary-tapcard/id6780261599)
 
 ---
 
 ## Tech Stack
 
-| Category | Technologies |
-|---|---|
-| **Frontend** | Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, Framer Motion |
-| **Forms & Validation** | React Hook Form, Zod |
-| **Backend** | Next.js Route Handlers, Prisma ORM |
-| **Database** | PostgreSQL 16 |
-| **Auth** | Auth.js (NextAuth v5) — credentials, OTP, OAuth |
-| **AI / LLM** | Claude Agent SDK (`@anthropic-ai/claude-agent-sdk`) — subscription auth |
-| **UI / Interaction** | dnd-kit (Kanban), qrcode, lucide-react |
-| **Deployment** | Docker, Coolify, Vercel-compatible |
+| Category               | Technologies                                                                  |
+| ---------------------- | ----------------------------------------------------------------------------- |
+| **Frontend**           | Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, Framer Motion |
+| **Forms & Validation** | React Hook Form, Zod                                                          |
+| **Backend**            | Next.js Route Handlers, Prisma ORM                                            |
+| **Database**           | PostgreSQL 16                                                                 |
+| **Auth**               | Auth.js (NextAuth v5) — credentials, OTP, OAuth                               |
+| **AI / LLM**           | Claude Agent SDK (`@anthropic-ai/claude-agent-sdk`) — subscription auth       |
+| **UI / Interaction**   | dnd-kit (Kanban), qrcode, lucide-react                                        |
+| **Deployment**         | Docker, Coolify, Vercel-compatible                                            |
 
 ---
 
@@ -121,6 +131,7 @@ tapcard/
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js 22+
 - Docker (for local Postgres) — or your own `DATABASE_URL`
 
@@ -147,9 +158,9 @@ npm run dev
 
 Open **http://localhost:3000**
 
-| | |
-|---|---|
-| **Demo login** | `demo@tapcard.app` / `password123` |
+|                      |                                      |
+| -------------------- | ------------------------------------ |
+| **Demo login**       | `demo@tapcard.app` / `password123`   |
 | **Demo public card** | http://localhost:3000/c/jordan-avery |
 
 > Email OTP codes are printed to the **server console** in dev (no email server required).
@@ -193,15 +204,15 @@ the optional `GOOGLE_/MICROSOFT_/LINKEDIN_CLIENT_ID/SECRET`, and `CLAUDE_CODE_OA
 
 ## Scripts
 
-| Script | Description |
-|---|---|
-| `npm run dev` | Start the dev server |
-| `npm run build` | `prisma generate` + production build |
-| `npm run setup` | Migrate + seed |
-| `npm run db:migrate` | Create/apply a migration |
-| `npm run db:seed` | Seed demo data |
-| `npm run db:studio` | Open Prisma Studio |
-| `npm run format` | Prettier |
+| Script               | Description                          |
+| -------------------- | ------------------------------------ |
+| `npm run dev`        | Start the dev server                 |
+| `npm run build`      | `prisma generate` + production build |
+| `npm run setup`      | Migrate + seed                       |
+| `npm run db:migrate` | Create/apply a migration             |
+| `npm run db:seed`    | Seed demo data                       |
+| `npm run db:studio`  | Open Prisma Studio                   |
+| `npm run format`     | Prettier                             |
 
 ---
 
