@@ -253,3 +253,6 @@ Built as a modern alternative to Blinq and CLDY — focused on simplicity, speed
 lead generation, and CRM.
 
 </div>
+
+<!-- deploy test: 2026-06-21 -->
+
