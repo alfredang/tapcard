@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import { createHmac, timingSafeEqual } from "node:crypto";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Mobile token auth (HS256 JWT), used by the native Tapcard apps.
@@ -19,7 +19,7 @@ function secret(): string {
 }
 
 function sign(data: string): string {
-  return crypto.createHmac("sha256", secret()).update(data).digest("base64url");
+  return createHmac("sha256", secret()).update(data).digest("base64url");
 }
 
 /** Issues a signed bearer token for [userId], valid for [days]. */
@@ -42,7 +42,7 @@ export function verifyMobileToken(token: string): string | null {
   const expectedSig = sign(`${header}.${payload}`);
   const a = Buffer.from(providedSig);
   const b = Buffer.from(expectedSig);
-  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
+  if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
 
   try {
     const decoded = JSON.parse(Buffer.from(payload, "base64url").toString());
