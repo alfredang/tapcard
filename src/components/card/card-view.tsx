@@ -275,9 +275,15 @@ export function CardView({
 
       <div className="mt-6 pb-5 text-center text-[11px]" style={{ color: t.subtext }}>
         Powered by{" "}
-        <span style={{ color: accent }} className="font-semibold">
+        <a
+          href="/?ref=card"
+          target="_blank"
+          rel="noopener"
+          style={{ color: accent }}
+          className="font-semibold hover:underline"
+        >
           Tapcard
-        </span>
+        </a>
       </div>
     </div>
   );

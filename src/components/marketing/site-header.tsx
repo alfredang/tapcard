@@ -39,7 +39,7 @@ export function SiteHeader() {
 
         <div className="hidden items-center gap-2 md:flex">
           <ThemeToggle />
-          <Button variant="ghost" size="sm" asChild>
+          <Button variant="outline" size="sm" asChild>
             <Link href="/login">Sign in</Link>
           </Button>
           <Button size="sm" asChild>

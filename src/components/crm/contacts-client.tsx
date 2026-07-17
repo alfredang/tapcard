@@ -14,11 +14,16 @@ import {
   Inbox,
   Sparkles,
   Loader2,
+  Users,
 } from "lucide-react";
 import { Surface, Badge } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea, Label } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
+import { PageHeader } from "@/components/app/page-header";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { toast } from "@/components/ui/toast";
 import { relativeTime } from "@/lib/utils";
 
 export interface ContactRow {
@@ -48,6 +53,13 @@ export interface LeadRow {
 
 const EMPTY: Partial<ContactRow> = { name: "" };
 
+function parseTags(tags: string | null): string[] {
+  return (tags ?? "")
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
+}
+
 export function ContactsClient({
   initialContacts,
   initialLeads,
@@ -66,6 +78,7 @@ export function ContactsClient({
     Record<string, { score: number; rating: string; summary: string; suggestedFollowUp: string }>
   >({});
   const [scoring, setScoring] = useState<string | null>(null);
+  const [confirmDel, setConfirmDel] = useState<{ kind: "contact" | "lead"; id: string } | null>(null);
 
   async function scoreLead(id: string) {
     setScoring(id);
@@ -78,7 +91,11 @@ export function ContactsClient({
       if (res.ok) {
         const { insight } = await res.json();
         setInsights((m) => ({ ...m, [id]: insight }));
+      } else {
+        toast.error("Couldn't score this lead. Try again.");
       }
+    } catch {
+      toast.error("Couldn't score this lead. Try again.");
     } finally {
       setScoring(null);
     }
@@ -107,29 +124,40 @@ export function ContactsClient({
     e.preventDefault();
     setSaving(true);
     const isEdit = Boolean(editing.id);
-    const res = await fetch(
-      isEdit ? `/api/contacts/${editing.id}` : "/api/contacts",
-      {
+    try {
+      const res = await fetch(isEdit ? `/api/contacts/${editing.id}` : "/api/contacts", {
         method: isEdit ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editing),
-      },
-    );
-    setSaving(false);
-    if (!res.ok) return;
-    const { contact } = await res.json();
-    setContacts((list) =>
-      isEdit
-        ? list.map((c) => (c.id === contact.id ? contact : c))
-        : [contact, ...list],
-    );
-    setModalOpen(false);
+      });
+      if (!res.ok) {
+        toast.error("Couldn't save contact. Please try again.");
+        return;
+      }
+      const { contact } = await res.json();
+      setContacts((list) =>
+        isEdit ? list.map((c) => (c.id === contact.id ? contact : c)) : [contact, ...list],
+      );
+      setModalOpen(false);
+      toast.success(isEdit ? "Contact updated" : "Contact added");
+    } finally {
+      setSaving(false);
+    }
   }
 
-  async function remove(id: string) {
-    if (!confirm("Delete this contact?")) return;
-    await fetch(`/api/contacts/${id}`, { method: "DELETE" });
-    setContacts((list) => list.filter((c) => c.id !== id));
+  async function doDelete() {
+    if (!confirmDel) return;
+    const { kind, id } = confirmDel;
+    setConfirmDel(null);
+    if (kind === "contact") {
+      setContacts((list) => list.filter((c) => c.id !== id));
+      const res = await fetch(`/api/contacts/${id}`, { method: "DELETE" });
+      res.ok ? toast.success("Contact deleted") : toast.error("Couldn't delete contact");
+    } else {
+      setLeads((list) => list.filter((l) => l.id !== id));
+      const res = await fetch(`/api/leads/${id}`, { method: "DELETE" });
+      res.ok ? toast.success("Lead deleted") : toast.error("Couldn't delete lead");
+    }
   }
 
   async function convertLead(id: string) {
@@ -138,18 +166,14 @@ export function ContactsClient({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ convert: true }),
     });
-    if (!res.ok) return;
+    if (!res.ok) {
+      toast.error("Couldn't convert this lead.");
+      return;
+    }
     const { contact } = await res.json();
     setContacts((list) => [contact, ...list]);
-    setLeads((list) =>
-      list.map((l) => (l.id === id ? { ...l, status: "CONVERTED" } : l)),
-    );
-  }
-
-  async function deleteLead(id: string) {
-    if (!confirm("Delete this lead?")) return;
-    await fetch(`/api/leads/${id}`, { method: "DELETE" });
-    setLeads((list) => list.filter((l) => l.id !== id));
+    setLeads((list) => list.map((l) => (l.id === id ? { ...l, status: "CONVERTED" } : l)));
+    toast.success(`${contact.name} added to contacts`);
   }
 
   function field(key: keyof ContactRow) {
@@ -157,34 +181,27 @@ export function ContactsClient({
       setEditing((c) => ({ ...c, [key]: e.target.value }));
   }
 
+  const openLeads = leads.filter((l) => l.status !== "CONVERTED").length;
+
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">Contacts & Leads</h1>
-          <p className="text-sm text-muted-foreground">
-            Manage your relationships and captured leads.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" asChild>
-            <a href="/api/contacts/export">
-              <Download className="h-4 w-4" /> Export CSV
-            </a>
-          </Button>
-          <Button size="sm" onClick={openNew}>
-            <Plus className="h-4 w-4" /> Add contact
-          </Button>
-        </div>
-      </div>
+      <PageHeader title="Contacts & Leads" description="Manage your relationships and captured leads.">
+        <Button variant="outline" size="sm" asChild>
+          <a href="/api/contacts/export">
+            <Download className="h-4 w-4" /> Export CSV
+          </a>
+        </Button>
+        <Button size="sm" onClick={openNew}>
+          <Plus className="h-4 w-4" /> Add contact
+        </Button>
+      </PageHeader>
 
       <div className="mb-4 flex items-center gap-2 rounded-lg bg-surface-2 p-1">
         <TabBtn active={tab === "contacts"} onClick={() => setTab("contacts")}>
           <UserCheck className="h-4 w-4" /> Contacts ({contacts.length})
         </TabBtn>
         <TabBtn active={tab === "leads"} onClick={() => setTab("leads")}>
-          <Inbox className="h-4 w-4" /> Leads (
-          {leads.filter((l) => l.status !== "CONVERTED").length})
+          <Inbox className="h-4 w-4" /> Leads ({openLeads})
         </TabBtn>
       </div>
 
@@ -200,66 +217,99 @@ export function ContactsClient({
             />
           </div>
 
-          {filtered.length === 0 ? (
+          {contacts.length === 0 ? (
+            <EmptyState
+              icon={Users}
+              title="No contacts yet"
+              description="Add contacts manually, or they'll appear here as you convert captured leads."
+              action={
+                <Button onClick={openNew}>
+                  <Plus className="h-4 w-4" /> Add your first contact
+                </Button>
+              }
+            />
+          ) : filtered.length === 0 ? (
             <Surface className="p-10 text-center text-sm text-muted-foreground">
-              No contacts found.
+              No contacts match “{query}”.
             </Surface>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((c) => (
-                <Surface key={c.id} className="flex flex-col p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="min-w-0">
-                      <p className="truncate font-semibold">{c.name}</p>
-                      {(c.position || c.company) && (
-                        <p className="truncate text-xs text-muted-foreground">
-                          {[c.position, c.company].filter(Boolean).join(" · ")}
+              {filtered.map((c) => {
+                const tags = parseTags(c.tags);
+                return (
+                  <Surface key={c.id} className="flex flex-col p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold">{c.name}</p>
+                        {(c.position || c.company) && (
+                          <p className="truncate text-xs text-muted-foreground">
+                            {[c.position, c.company].filter(Boolean).join(" · ")}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => openEdit(c)}
+                          className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
+                          aria-label="Edit contact"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => setConfirmDel({ kind: "contact", id: c.id })}
+                          className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger"
+                          aria-label="Delete contact"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="mt-3 space-y-1.5 text-xs">
+                      {c.email && (
+                        <a
+                          href={`mailto:${c.email}`}
+                          className="flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-primary"
+                        >
+                          <Mail className="h-3.5 w-3.5 shrink-0" /> <span className="truncate">{c.email}</span>
+                        </a>
+                      )}
+                      {c.phone && (
+                        <a
+                          href={`tel:${c.phone}`}
+                          className="flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-primary"
+                        >
+                          <Phone className="h-3.5 w-3.5 shrink-0" /> {c.phone}
+                        </a>
+                      )}
+                      {c.company && (
+                        <p className="flex items-center gap-1.5 text-muted-foreground">
+                          <Building2 className="h-3.5 w-3.5 shrink-0" /> {c.company}
                         </p>
                       )}
                     </div>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => openEdit(c)}
-                        className="text-muted-foreground hover:text-foreground"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => remove(c.id)}
-                        className="text-muted-foreground hover:text-danger"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="mt-3 space-y-1 text-xs text-muted-foreground">
-                    {c.email && (
-                      <p className="flex items-center gap-1.5">
-                        <Mail className="h-3.5 w-3.5" /> {c.email}
-                      </p>
+                    {tags.length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        {tags.map((t) => (
+                          <Badge key={t} tone="primary">
+                            {t}
+                          </Badge>
+                        ))}
+                      </div>
                     )}
-                    {c.phone && (
-                      <p className="flex items-center gap-1.5">
-                        <Phone className="h-3.5 w-3.5" /> {c.phone}
-                      </p>
-                    )}
-                    {c.company && (
-                      <p className="flex items-center gap-1.5">
-                        <Building2 className="h-3.5 w-3.5" /> {c.company}
-                      </p>
-                    )}
-                  </div>
-                </Surface>
-              ))}
+                  </Surface>
+                );
+              })}
             </div>
           )}
         </>
       ) : (
         <div className="space-y-3">
           {leads.length === 0 ? (
-            <Surface className="p-10 text-center text-sm text-muted-foreground">
-              No leads yet — share your card to capture them.
-            </Surface>
+            <EmptyState
+              icon={Inbox}
+              title="No leads yet"
+              description="When someone fills in the contact form on your shared card, they'll show up here."
+            />
           ) : (
             leads.map((l) => {
               const insight = insights[l.id];
@@ -269,52 +319,27 @@ export function ContactsClient({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <p className="font-semibold">{l.name}</p>
-                        <Badge
-                          tone={l.status === "CONVERTED" ? "success" : "warning"}
-                        >
-                          {l.status}
-                        </Badge>
+                        <Badge tone={l.status === "CONVERTED" ? "success" : "warning"}>{l.status}</Badge>
                       </div>
                       <p className="text-xs text-muted-foreground">
                         {[l.company, l.email, l.phone].filter(Boolean).join(" · ")}
                       </p>
                       {l.message && (
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          “{l.message}”
-                        </p>
+                        <p className="mt-1 text-sm text-muted-foreground">“{l.message}”</p>
                       )}
                     </div>
-                    <span className="text-xs text-muted-foreground">
-                      {relativeTime(l.createdAt)}
-                    </span>
+                    <span className="text-xs text-muted-foreground">{relativeTime(l.createdAt)}</span>
                     <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => scoreLead(l.id)}
-                        disabled={scoring === l.id}
-                      >
-                        {scoring === l.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Sparkles className="h-4 w-4" />
-                        )}
+                      <Button size="sm" variant="outline" onClick={() => scoreLead(l.id)} disabled={scoring === l.id}>
+                        {scoring === l.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                         AI score
                       </Button>
                       {l.status !== "CONVERTED" && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => convertLead(l.id)}
-                        >
+                        <Button size="sm" variant="outline" onClick={() => convertLead(l.id)}>
                           <UserCheck className="h-4 w-4" /> Convert
                         </Button>
                       )}
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => deleteLead(l.id)}
-                      >
+                      <Button size="sm" variant="ghost" onClick={() => setConfirmDel({ kind: "lead", id: l.id })} aria-label="Delete lead">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -324,23 +349,14 @@ export function ContactsClient({
                     <div className="mt-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
                       <div className="flex items-center gap-2">
                         <Badge
-                          tone={
-                            insight.rating === "Hot"
-                              ? "danger"
-                              : insight.rating === "Warm"
-                                ? "warning"
-                                : "default"
-                          }
+                          tone={insight.rating === "Hot" ? "danger" : insight.rating === "Warm" ? "warning" : "default"}
                         >
                           {insight.rating} · {insight.score}/100
                         </Badge>
                       </div>
                       <p className="mt-2 text-sm">{insight.summary}</p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        <span className="font-medium text-foreground">
-                          Next step:
-                        </span>{" "}
-                        {insight.suggestedFollowUp}
+                        <span className="font-medium text-foreground">Next step:</span> {insight.suggestedFollowUp}
                       </p>
                     </div>
                   )}
@@ -351,11 +367,7 @@ export function ContactsClient({
         </div>
       )}
 
-      <Modal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        title={editing.id ? "Edit contact" : "Add contact"}
-      >
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing.id ? "Edit contact" : "Add contact"}>
         <form onSubmit={save} className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
@@ -372,11 +384,7 @@ export function ContactsClient({
             </div>
             <div>
               <Label>Email</Label>
-              <Input
-                type="email"
-                value={editing.email ?? ""}
-                onChange={field("email")}
-              />
+              <Input type="email" value={editing.email ?? ""} onChange={field("email")} />
             </div>
             <div>
               <Label>Phone</Label>
@@ -389,30 +397,30 @@ export function ContactsClient({
           </div>
           <div>
             <Label>Tags</Label>
-            <Input
-              value={editing.tags ?? ""}
-              onChange={field("tags")}
-              placeholder="vip, event, referral"
-            />
+            <Input value={editing.tags ?? ""} onChange={field("tags")} placeholder="vip, event, referral" />
           </div>
           <div>
             <Label>Notes</Label>
             <Textarea value={editing.notes ?? ""} onChange={field("notes")} />
           </div>
           <div className="flex justify-end gap-2 pt-2">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setModalOpen(false)}
-            >
+            <Button type="button" variant="ghost" onClick={() => setModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={saving}>
-              {saving ? "Saving…" : "Save contact"}
+            <Button type="submit" loading={saving}>
+              Save contact
             </Button>
           </div>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        open={confirmDel !== null}
+        title={confirmDel?.kind === "lead" ? "Delete lead?" : "Delete contact?"}
+        message="This can't be undone."
+        onConfirm={doDelete}
+        onCancel={() => setConfirmDel(null)}
+      />
     </div>
   );
 }

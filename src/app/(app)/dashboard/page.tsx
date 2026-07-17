@@ -11,8 +11,11 @@ import {
 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
-import { Surface, Badge } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, Badge } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/app/page-header";
+import { StatCard } from "@/components/app/stat-card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { relativeTime } from "@/lib/utils";
 
 export const metadata = { title: "Dashboard — Tapcard" };
@@ -20,14 +23,13 @@ export const metadata = { title: "Dashboard — Tapcard" };
 export default async function DashboardPage() {
   const user = await requireUser();
 
-  const [contacts, totalLeads, newLeads, wonDeals, lostDeals, cards, views, recentLeads] =
+  const [contacts, totalLeads, newLeads, wonDeals, lostDeals, views, recentLeads] =
     await Promise.all([
       prisma.contact.count({ where: { userId: user.id } }),
       prisma.lead.count({ where: { userId: user.id } }),
       prisma.lead.count({ where: { userId: user.id, status: "NEW" } }),
       prisma.deal.count({ where: { userId: user.id, stage: "WON" } }),
       prisma.deal.count({ where: { userId: user.id, stage: "LOST" } }),
-      prisma.card.findMany({ where: { userId: user.id }, select: { id: true } }),
       prisma.analyticsEvent.count({
         where: { card: { userId: user.id }, type: "VIEW" },
       }),
@@ -49,56 +51,50 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">
-            Welcome back{user.name ? `, ${user.name.split(" ")[0]}` : ""} 👋
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Here&apos;s what&apos;s happening across your cards and pipeline.
-          </p>
-        </div>
+      <PageHeader
+        title={<>Welcome back{user.name ? `, ${user.name}` : ""} 👋</>}
+        description="Here's what's happening across your cards and pipeline."
+      >
         <Button asChild>
           <Link href="/cards/new">
             <Plus className="h-4 w-4" /> New card
           </Link>
         </Button>
-      </div>
+      </PageHeader>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
         {stats.map((s) => (
-          <Surface key={s.label} className="p-5">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">{s.label}</span>
-              <s.icon className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <p className="mt-2 text-3xl font-bold">{s.value}</p>
-          </Surface>
+          <StatCard key={s.label} icon={s.icon} label={s.label} value={s.value} tone={s.tone} />
         ))}
       </div>
 
       <div className="mt-6 grid gap-5 lg:grid-cols-3">
-        <Surface className="p-5 lg:col-span-2">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-semibold">Recent leads</h2>
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Recent leads</CardTitle>
             <Link
               href="/crm/contacts"
               className="flex items-center gap-1 text-sm text-primary hover:underline"
             >
               View all <ArrowRight className="h-3.5 w-3.5" />
             </Link>
-          </div>
+          </CardHeader>
           {recentLeads.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              No leads yet — share your card to start capturing them.
-            </p>
+            <EmptyState
+              icon={UserPlus}
+              title="No leads yet"
+              description="Share your card to start capturing leads automatically."
+              className="border-0 py-8"
+              action={
+                <Button asChild size="sm" variant="secondary">
+                  <Link href="/cards">Share your card</Link>
+                </Button>
+              }
+            />
           ) : (
             <div className="divide-y divide-border">
               {recentLeads.map((lead) => (
-                <div
-                  key={lead.id}
-                  className="flex items-center justify-between py-3"
-                >
+                <div key={lead.id} className="flex items-center justify-between py-3">
                   <div className="min-w-0">
                     <p className="truncate font-medium">{lead.name}</p>
                     <p className="truncate text-xs text-muted-foreground">
@@ -106,9 +102,7 @@ export default async function DashboardPage() {
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Badge
-                      tone={lead.status === "NEW" ? "warning" : "default"}
-                    >
+                    <Badge tone={lead.status === "NEW" ? "warning" : "default"}>
                       {lead.status}
                     </Badge>
                     <span className="hidden text-xs text-muted-foreground sm:block">
@@ -119,17 +113,19 @@ export default async function DashboardPage() {
               ))}
             </div>
           )}
-        </Surface>
+        </Card>
 
-        <Surface className="p-5">
-          <h2 className="mb-4 font-semibold">Quick actions</h2>
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick actions</CardTitle>
+          </CardHeader>
           <div className="space-y-2">
             <QuickLink href="/cards" icon={CreditCard} label="Manage cards" />
             <QuickLink href="/crm/pipeline" icon={Trophy} label="Sales pipeline" />
             <QuickLink href="/crm/contacts" icon={Users} label="Contacts" />
             <QuickLink href="/analytics" icon={Eye} label="Analytics" />
           </div>
-        </Surface>
+        </Card>
       </div>
     </div>
   );

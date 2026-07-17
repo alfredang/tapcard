@@ -1,6 +1,9 @@
 import { Palette, Globe, Shield, User } from "lucide-react";
 import { requireUser } from "@/lib/session";
-import { Surface, Badge } from "@/components/ui/card";
+import { Card, Badge } from "@/components/ui/card";
+import { PageHeader } from "@/components/app/page-header";
+import { SignOutButton } from "@/components/app/sign-out-button";
+import { initials } from "@/lib/utils";
 
 export const metadata = { title: "Settings — Tapcard" };
 
@@ -9,32 +12,29 @@ export default async function SettingsPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">Settings</h1>
-        <p className="text-sm text-muted-foreground">
-          Manage your account and workspace.
-        </p>
-      </div>
+      <PageHeader title="Settings" description="Manage your account and workspace." />
 
       <div className="space-y-5">
-        <Surface className="p-6">
+        <Card className="p-6">
           <div className="mb-4 flex items-center gap-2">
             <User className="h-4 w-4 text-primary" />
             <h2 className="font-semibold">Profile</h2>
           </div>
-          <dl className="grid gap-3 text-sm sm:grid-cols-2">
-            <div>
-              <dt className="text-muted-foreground">Name</dt>
-              <dd className="font-medium">{user.name || "—"}</dd>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="gradient-primary flex h-12 w-12 items-center justify-center rounded-full text-sm font-bold text-white">
+                {initials(user.name || user.email)}
+              </div>
+              <div>
+                <p className="font-semibold">{user.name || "Account"}</p>
+                <p className="text-sm text-muted-foreground">{user.email}</p>
+              </div>
             </div>
-            <div>
-              <dt className="text-muted-foreground">Email</dt>
-              <dd className="font-medium">{user.email}</dd>
-            </div>
-          </dl>
-        </Surface>
+            <SignOutButton />
+          </div>
+        </Card>
 
-        <Surface className="p-6">
+        <Card className="p-6">
           <div className="mb-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Palette className="h-4 w-4 text-primary" />
@@ -61,19 +61,18 @@ export default async function SettingsPage() {
               </div>
             ))}
           </div>
-        </Surface>
+        </Card>
 
-        <Surface className="p-6">
+        <Card className="p-6">
           <div className="mb-2 flex items-center gap-2">
             <Shield className="h-4 w-4 text-primary" />
-            <h2 className="font-semibold">Connected sign-in methods</h2>
+            <h2 className="font-semibold">Sign-in methods</h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            Email &amp; password and email OTP are enabled. Google, Microsoft and
-            LinkedIn single sign-on activate automatically once their credentials
-            are configured in your environment.
+            Your account signs in with email &amp; password or a one-time email code.
+            Google, Microsoft and LinkedIn single sign-on are also supported.
           </p>
-        </Surface>
+        </Card>
       </div>
     </div>
   );

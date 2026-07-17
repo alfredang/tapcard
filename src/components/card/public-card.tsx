@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { UserPlus, Loader2, CheckCircle2, Share2 } from "lucide-react";
+import { UserPlus, Loader2, CheckCircle2, Share2, Check } from "lucide-react";
 import { CardView } from "@/components/card/card-view";
 import { getTheme } from "@/lib/themes";
 import { appUrl } from "@/lib/utils";
 import { WHATSAPP_PRESETS, whatsappLink } from "@/lib/whatsapp";
+import { toast } from "@/components/ui/toast";
 import type { CardData } from "@/lib/card";
 
 export function PublicCard({ card }: { card: CardData }) {
@@ -15,6 +16,7 @@ export function PublicCard({ card }: { card: CardData }) {
   const accent = card.accentColor || t.accent;
   const search = useSearchParams();
   const [showLead, setShowLead] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   // Fire analytics on mount: a view, plus a QR scan when arriving via ?src=qr.
   useEffect(() => {
@@ -31,11 +33,16 @@ export function PublicCard({ card }: { card: CardData }) {
 
   async function share() {
     if (navigator.share) {
-      await navigator
-        .share({ title: card.fullName, url: shareUrl })
-        .catch(() => {});
+      await navigator.share({ title: card.fullName, url: shareUrl }).catch(() => {});
     } else {
-      await navigator.clipboard.writeText(shareUrl);
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        setCopied(true);
+        toast.success("Link copied to clipboard!");
+        setTimeout(() => setCopied(false), 2000);
+      } catch {
+        toast.error("Couldn't copy the link.");
+      }
     }
   }
 
@@ -70,7 +77,8 @@ export function PublicCard({ card }: { card: CardData }) {
               border: `1px solid ${t.cardBorder}`,
             }}
           >
-            <Share2 className="h-4 w-4" /> Share
+            {copied ? <Check className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
+            {copied ? "Copied!" : "Share"}
           </button>
           {waShare && (
             <a
@@ -160,7 +168,10 @@ function LeadForm({
     background: theme.cardBg,
     color: theme.text,
     border: `1px solid ${theme.cardBorder}`,
+    // Drives the focus ring colour for the arbitrary Tailwind `focus-visible:ring-2`.
+    ["--tw-ring-color" as string]: accent,
   };
+  const inputClass = "w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus-visible:ring-2";
 
   if (done) {
     return (
@@ -196,43 +207,49 @@ function LeadForm({
       </div>
       <input
         required
+        aria-label="Your name"
         placeholder="Your name"
         value={form.name}
         onChange={update("name")}
-        className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+        className={inputClass}
         style={inputStyle}
       />
       <input
         type="email"
+        aria-label="Email"
         placeholder="Email"
         value={form.email}
         onChange={update("email")}
-        className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+        className={inputClass}
         style={inputStyle}
       />
       <input
+        type="tel"
+        aria-label="Phone"
         placeholder="Phone"
         value={form.phone}
         onChange={update("phone")}
-        className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+        className={inputClass}
         style={inputStyle}
       />
       <input
+        aria-label="Company"
         placeholder="Company"
         value={form.company}
         onChange={update("company")}
-        className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+        className={inputClass}
         style={inputStyle}
       />
       <textarea
+        aria-label="Message (optional)"
         placeholder="Message (optional)"
         value={form.message}
         onChange={update("message")}
         rows={2}
-        className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+        className={inputClass}
         style={inputStyle}
       />
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && <p className="text-xs text-danger">{error}</p>}
       <button
         type="submit"
         disabled={loading}

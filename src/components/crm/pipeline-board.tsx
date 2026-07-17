@@ -17,6 +17,9 @@ import { Surface } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea, Label } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
+import { PageHeader } from "@/components/app/page-header";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { toast } from "@/components/ui/toast";
 import { formatCurrency } from "@/lib/utils";
 
 export interface DealRow {
@@ -42,10 +45,14 @@ export function PipelineBoard({ initialDeals }: { initialDeals: DealRow[] }) {
   const [deals, setDeals] = useState(initialDeals);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [confirmDelId, setConfirmDelId] = useState<string | null>(null);
   const [form, setForm] = useState({ title: "", value: "", stage: "NEW_LEAD", notes: "" });
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
   );
+
+  const grandTotal = deals.reduce((sum, d) => sum + d.value, 0);
 
   const byStage = useMemo(() => {
     const map: Record<string, DealRow[]> = {};
@@ -67,49 +74,67 @@ export function PipelineBoard({ initialDeals }: { initialDeals: DealRow[] }) {
     if (!overStage) return;
     const deal = deals.find((d) => d.id === dealId);
     if (!deal || deal.stage === overStage) return;
+    const prevStage = deal.stage;
 
     setDeals((list) =>
       list.map((d) => (d.id === dealId ? { ...d, stage: overStage } : d)),
     );
-    await fetch(`/api/deals/${dealId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ stage: overStage }),
-    }).catch(() => {});
+    try {
+      const res = await fetch(`/api/deals/${dealId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stage: overStage }),
+      });
+      if (!res.ok) throw new Error();
+    } catch {
+      // Roll back the optimistic move so the board matches the database.
+      setDeals((list) => list.map((d) => (d.id === dealId ? { ...d, stage: prevStage } : d)));
+      toast.error("Couldn't move that deal — reverted.");
+    }
   }
 
   async function addDeal(e: React.FormEvent) {
     e.preventDefault();
-    const res = await fetch("/api/deals", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, value: Number(form.value || 0) }),
-    });
-    if (!res.ok) return;
-    const { deal } = await res.json();
-    setDeals((list) => [deal, ...list]);
-    setModalOpen(false);
-    setForm({ title: "", value: "", stage: "NEW_LEAD", notes: "" });
+    setSaving(true);
+    try {
+      const res = await fetch("/api/deals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, value: Number(form.value || 0) }),
+      });
+      if (!res.ok) {
+        toast.error("Couldn't add deal. Please try again.");
+        return;
+      }
+      const { deal } = await res.json();
+      setDeals((list) => [deal, ...list]);
+      setModalOpen(false);
+      setForm({ title: "", value: "", stage: "NEW_LEAD", notes: "" });
+      toast.success("Deal added");
+    } finally {
+      setSaving(false);
+    }
   }
 
-  async function removeDeal(id: string) {
-    await fetch(`/api/deals/${id}`, { method: "DELETE" });
+  async function doDelete() {
+    const id = confirmDelId;
+    if (!id) return;
+    setConfirmDelId(null);
     setDeals((list) => list.filter((d) => d.id !== id));
+    const res = await fetch(`/api/deals/${id}`, { method: "DELETE" });
+    res.ok ? toast.success("Deal deleted") : toast.error("Couldn't delete deal");
   }
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Sales Pipeline</h1>
-          <p className="text-sm text-muted-foreground">
-            Drag deals between stages to update them.
-          </p>
-        </div>
+      <PageHeader
+        title="Sales Pipeline"
+        description={`${deals.length} deal${deals.length === 1 ? "" : "s"} · ${formatCurrency(grandTotal)} in pipeline`}
+      >
         <Button size="sm" onClick={() => setModalOpen(true)}>
           <Plus className="h-4 w-4" /> Add deal
         </Button>
-      </div>
+      </PageHeader>
 
       <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
         <div className="flex gap-3 overflow-x-auto pb-4">
@@ -124,7 +149,7 @@ export function PipelineBoard({ initialDeals }: { initialDeals: DealRow[] }) {
                 total={total}
               >
                 {items.map((deal) => (
-                  <DealCard key={deal.id} deal={deal} onDelete={removeDeal} />
+                  <DealCard key={deal.id} deal={deal} onDelete={setConfirmDelId} />
                 ))}
               </Column>
             );
@@ -180,10 +205,18 @@ export function PipelineBoard({ initialDeals }: { initialDeals: DealRow[] }) {
             <Button type="button" variant="ghost" onClick={() => setModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit">Add deal</Button>
+            <Button type="submit" loading={saving}>Add deal</Button>
           </div>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        open={confirmDelId !== null}
+        title="Delete deal?"
+        message="This permanently removes the deal from your pipeline."
+        onConfirm={doDelete}
+        onCancel={() => setConfirmDelId(null)}
+      />
     </div>
   );
 }
