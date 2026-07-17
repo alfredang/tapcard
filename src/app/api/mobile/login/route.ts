@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { loginSchema } from "@/lib/validators";
 import { signMobileToken } from "@/lib/mobile-auth";
+import { rateLimit, clientIp, tooManyRequests } from "@/lib/rate-limit";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Mobile login — email + password, returns a bearer token for the native apps.
@@ -10,6 +11,10 @@ import { signMobileToken } from "@/lib/mobile-auth";
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function POST(req: Request) {
+  const ip = clientIp(req);
+  const limited = rateLimit(`login:ip:${ip}`, 20, 5 * 60_000); // 20 / 5 min per IP
+  if (!limited.ok) return tooManyRequests(limited.retryAfterSec);
+
   const body = await req.json().catch(() => null);
   const parsed = loginSchema.safeParse(body);
   if (!parsed.success) {

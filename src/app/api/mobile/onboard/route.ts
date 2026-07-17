@@ -4,6 +4,8 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { cardSchema } from "@/lib/validators";
 import { slugify, randomSuffix, appUrl } from "@/lib/utils";
+import { rateLimit, clientIp, tooManyRequests } from "@/lib/rate-limit";
+import { getMobileUserId } from "@/lib/mobile-auth";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Mobile onboarding — used by the native iOS "Tapcard" app.
@@ -43,6 +45,10 @@ async function uniqueSlug(base: string) {
 }
 
 export async function POST(req: Request) {
+  // Throttle per IP so this account/card-creating endpoint can't be flooded.
+  const limited = rateLimit(`onboard:ip:${clientIp(req)}`, 10, 10 * 60_000); // 10 / 10 min
+  if (!limited.ok) return tooManyRequests(limited.retryAfterSec);
+
   // Optional shared-secret gate. When MOBILE_API_KEY is set in the environment,
   // the app must send a matching `x-tapcard-key` header; when unset the endpoint
   // is open (handy for local dev).
@@ -63,8 +69,35 @@ export async function POST(req: Request) {
   const { email: rawEmail, password: rawPassword, ...cardFields } = parsed.data;
   const email = rawEmail.toLowerCase();
 
-  // Find or create the account. A generated password is returned only for a
-  // newly created account so the app can store it for future logins.
+  // ── Path 1: token-authenticated (the Android app's "Publish to web" while
+  //    signed in). The bearer token identifies the owner, so we attach the
+  //    published card to that account — no key or new-account creation needed.
+  //    This is why publish works in production even when MOBILE_API_KEY is set.
+  const tokenUserId = getMobileUserId(req);
+  if (tokenUserId) {
+    const user = await prisma.user.findUnique({ where: { id: tokenUserId } });
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const slug = await uniqueSlug(cardFields.fullName);
+    const card = await prisma.card.create({
+      data: { ...cardFields, email, slug, userId: user.id, published: true },
+    });
+    return NextResponse.json({
+      ok: true,
+      isNewAccount: false,
+      email,
+      card: {
+        id: card.id,
+        slug: card.slug,
+        url: appUrl(`/c/${card.slug}`),
+      },
+    });
+  }
+
+  // ── Path 2: legacy shared-key + email (native iOS app). Unchanged behavior:
+  //    find or create the account. A generated password is returned only for a
+  //    newly created account so the app can store it for future logins.
   let user = await prisma.user.findUnique({ where: { email } });
   let isNewAccount = false;
   let issuedPassword: string | undefined;
