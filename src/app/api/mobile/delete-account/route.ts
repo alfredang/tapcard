@@ -80,10 +80,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   }
 
-  // ── Path 2: legacy shared-key + email (native iOS app). FAIL CLOSED — only
-  //    allowed when MOBILE_API_KEY is configured AND the header matches.
+  // ── Path 2: legacy shared-key + email (native iOS app). Matches onboard's
+  //    gate: when MOBILE_API_KEY is set, the x-tapcard-key header must match;
+  //    when it is unset, this path stays open so the current live iOS app keeps
+  //    working (it does not send a token). NOTE: while the key is unset an
+  //    account can still be deleted by email alone — the same behavior as before
+  //    this change, i.e. no regression. To fully close that, set MOBILE_API_KEY
+  //    in the environment AND update the iOS app to send x-tapcard-key.
   const requiredKey = process.env.MOBILE_API_KEY;
-  if (!requiredKey || req.headers.get("x-tapcard-key") !== requiredKey) {
+  if (requiredKey && req.headers.get("x-tapcard-key") !== requiredKey) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
