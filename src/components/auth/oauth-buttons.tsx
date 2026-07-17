@@ -2,11 +2,12 @@
 
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
+import { GoogleIcon, MicrosoftIcon, LinkedInIcon } from "@/components/icons/brand";
 
 const PROVIDERS = [
-  { id: "google", label: "Google" },
-  { id: "microsoft-entra-id", label: "Microsoft" },
-  { id: "linkedin", label: "LinkedIn" },
+  { id: "google", label: "Google", Icon: GoogleIcon },
+  { id: "microsoft-entra-id", label: "Microsoft", Icon: MicrosoftIcon },
+  { id: "linkedin", label: "LinkedIn", Icon: LinkedInIcon },
 ] as const;
 
 export function OAuthButtons({
@@ -32,7 +33,7 @@ export function OAuthButtons({
           className="w-full"
           onClick={() => signIn(p.id, { redirectTo: "/dashboard" })}
         >
-          Continue with {p.label}
+          <p.Icon className="h-4 w-4" /> Continue with {p.label}
         </Button>
       ))}
     </div>

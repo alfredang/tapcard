@@ -18,13 +18,19 @@ export default function MarketingLayout({
         <div className="text-muted-foreground mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-8 text-sm sm:flex-row">
           <p>© {new Date().getFullYear()} Tapcard. All rights reserved.</p>
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
-            <div className="flex gap-5">
+            <div className="flex flex-wrap justify-center gap-x-5 gap-y-2">
               <a href="#features" className="hover:text-foreground">
                 Features
               </a>
               <a href="#pricing" className="hover:text-foreground">
                 Pricing
               </a>
+              <Link href="/help" className="hover:text-foreground">
+                Help
+              </Link>
+              <Link href="/privacy" className="hover:text-foreground">
+                Privacy
+              </Link>
               <Link href="/login" className="hover:text-foreground">
                 Sign in
               </Link>

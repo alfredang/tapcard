@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { Input, Textarea, Label } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -54,10 +54,12 @@ export function TextField({
   placeholder?: string;
   type?: string;
 }) {
+  const id = useId();
   return (
     <div>
-      <Label>{label}</Label>
+      <Label htmlFor={id}>{label}</Label>
       <Input
+        id={id}
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -80,13 +82,15 @@ export function AreaField({
   placeholder?: string;
   action?: React.ReactNode;
 }) {
+  const id = useId();
   return (
     <div>
       <div className="flex items-center justify-between">
-        <Label>{label}</Label>
+        <Label htmlFor={id}>{label}</Label>
         {action}
       </div>
       <Textarea
+        id={id}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}

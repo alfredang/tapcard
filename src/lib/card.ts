@@ -31,7 +31,6 @@ export interface CardData {
   profilePhoto?: string | null;
   companyLogo?: string | null;
   coverBanner?: string | null;
-  introVideo?: string | null;
 
   theme?: string | null;
   accentColor?: string | null;

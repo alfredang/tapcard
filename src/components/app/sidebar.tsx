@@ -10,9 +10,7 @@ import {
   Users,
   KanbanSquare,
   BarChart3,
-  CheckSquare,
   CalendarDays,
-  Building2,
   Settings,
   Sparkles,
   LogOut,
@@ -29,9 +27,7 @@ const NAV = [
   { href: "/crm/contacts", label: "Contacts", icon: Users },
   { href: "/crm/pipeline", label: "Pipeline", icon: KanbanSquare },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/tasks", label: "Tasks", icon: CheckSquare },
-  { href: "/appointments", label: "Bookings", icon: CalendarDays },
-  { href: "/team", label: "Team", icon: Building2 },
+  { href: "/planner", label: "Planner", icon: CalendarDays },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
@@ -132,7 +128,10 @@ export function Sidebar({
             variant="ghost"
             size="sm"
             className="mt-2 w-full justify-start text-muted-foreground"
-            onClick={() => signOut({ redirectTo: "/" })}
+            onClick={async () => {
+              await signOut({ redirect: false });
+              window.location.href = "/";
+            }}
           >
             <LogOut className="h-4 w-4" /> Sign out
           </Button>

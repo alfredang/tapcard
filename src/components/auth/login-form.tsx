@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { Mail, KeyRound, Loader2 } from "lucide-react";
+import { Mail, KeyRound, Loader2, Eye, EyeOff } from "lucide-react";
 import { Surface } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input, Label, FieldError } from "@/components/ui/input";
@@ -21,6 +21,7 @@ export function LoginForm({
   const [mode, setMode] = useState<Mode>("password");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [code, setCode] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -61,7 +62,7 @@ export function LoginForm({
       return;
     }
     setOtpSent(true);
-    setInfo("We sent a 6-digit code. (Dev mode: check the server console.)");
+    setInfo("We sent a 6-digit code to your email.");
   }
 
   async function verifyOtp(e: React.FormEvent) {
@@ -125,16 +126,40 @@ export function LoginForm({
             />
           </div>
           <div>
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-            />
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">Password</Label>
+              <button
+                type="button"
+                onClick={() => setMode("otp")}
+                className="mb-1.5 text-xs text-primary hover:underline"
+              >
+                Forgot password?
+              </button>
+            </div>
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="pr-10"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((s) => !s)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
+              >
+                {showPassword ? (
+                  <Eye className="h-4 w-4" />
+                ) : (
+                  <EyeOff className="h-4 w-4" />
+                )}
+              </button>
+            </div>
           </div>
           <FieldError message={error} />
           <Button type="submit" className="w-full" disabled={loading}>

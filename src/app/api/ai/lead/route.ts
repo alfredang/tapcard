@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { getUserId } from "@/lib/session";
+import { rateLimit, tooManyRequests } from "@/lib/rate-limit";
 import { analyzeLead } from "@/lib/ai";
 
 const schema = z.object({ leadId: z.string() });
@@ -10,6 +11,10 @@ const schema = z.object({ leadId: z.string() });
 export async function POST(req: Request) {
   const userId = await getUserId();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // Cap expensive LLM calls per user.
+  const limited = rateLimit(`ai:lead:${userId}`, 20, 60_000); // 20 / min
+  if (!limited.ok) return tooManyRequests(limited.retryAfterSec);
 
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);

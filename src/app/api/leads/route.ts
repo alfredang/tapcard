@@ -2,11 +2,15 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { leadSchema } from "@/lib/validators";
+import { rateLimit, clientIp, tooManyRequests } from "@/lib/rate-limit";
 
 const bodySchema = leadSchema.extend({ slug: z.string() });
 
 // Public lead capture from a card's public page.
 export async function POST(req: Request) {
+  const limited = rateLimit(`leads:ip:${clientIp(req)}`, 20, 10 * 60_000); // 20 / 10 min
+  if (!limited.ok) return tooManyRequests(limited.retryAfterSec);
+
   const body = await req.json().catch(() => null);
   const parsed = bodySchema.safeParse(body);
   if (!parsed.success) {
