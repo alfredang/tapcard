@@ -95,6 +95,10 @@ model User {
   emailVerified DateTime?
   image         String?
   password      String? // bcrypt hash; null for OAuth-only accounts
+  // Google Calendar connection (separate from sign-in): a stored refresh token
+  // lets the server insert appointments into the user's own Google Calendar.
+  googleCalRefresh String?
+  googleCalEmail   String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -221,6 +225,7 @@ model Card {
   coverBanner  String?
   introVideo   String?
   gallery      Json? // string[] of image URLs
+  links        Json? // [{ label, url, kind }] rich links (payment/booking/product/file/custom)
 
   // Design
   theme       Theme   @default(MODERN)

@@ -187,8 +187,3 @@ function ratingFromScore(score: number): LeadInsight["rating"] {
   if (score >= 45) return "Warm";
   return "Cold";
 }
-
-/** Whether a subscription credential appears to be configured (best-effort hint). */
-export function aiConfigured() {
-  return Boolean(process.env.CLAUDE_CODE_OAUTH_TOKEN) || true; // logged-in CLI also works
-}

@@ -18,6 +18,15 @@ const optionalStr = z
   .or(z.literal(""))
   .nullish();
 
+// An image field that may hold either a hosted URL or an inline base64 data URL
+// (uploaded photo). Much larger cap than optionalStr so a data URL round-trips.
+const optionalImage = z
+  .string()
+  .trim()
+  .max(3_500_000)
+  .or(z.literal(""))
+  .nullish();
+
 const optionalEmail = z
   .string()
   .trim()
@@ -49,10 +58,9 @@ export const cardSchema = z.object({
   telegram: optionalStr,
   youtube: optionalStr,
 
-  profilePhoto: optionalStr,
-  companyLogo: optionalStr,
-  coverBanner: optionalStr,
-  introVideo: optionalStr,
+  profilePhoto: optionalImage,
+  companyLogo: optionalImage,
+  coverBanner: optionalImage,
 
   theme: z
     .enum(["CORPORATE", "MODERN", "MINIMALIST", "DARK", "CREATIVE", "LUXURY"])
