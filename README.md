@@ -49,7 +49,7 @@ relationship.
 | 🍎  | **iOS app**          | Tertiary Tapcard is available on the App Store for iPhone users.                                                         |
 | 🤖  | **AI**               | Bio / about generation and lead scoring via the **Claude Agent SDK** (subscription — no API key).                        |
 | 📈  | **Analytics**        | Card views, QR scans, downloads and click tracking with an engagement dashboard.                                         |
-| 🔐  | **Auth**             | Passwordless — Google SSO and one-time email codes. No password is ever stored. (Microsoft / LinkedIn SSO auto-enable when configured.) |
+| 🔐  | **Auth**             | Email + password, one-time email codes, and Google SSO. (Microsoft / LinkedIn SSO auto-enable when configured.) |
 
 ---
 
@@ -160,7 +160,7 @@ Open **http://localhost:3000**
 
 |                      |                                      |
 | -------------------- | ------------------------------------ |
-| **Demo login**       | `demo@tapcard.app` (code in console) |
+| **Demo login**       | `demo@tapcard.app` / `password123`   |
 | **Demo public card** | http://localhost:3000/c/jordan-avery |
 
 > Email OTP codes are printed to the **server console** in dev (no email server required).
@@ -203,15 +203,19 @@ See [`.env.example`](./.env.example). Key ones: `DATABASE_URL`, `AUTH_SECRET`, `
 
 ### Sign-in
 
-Two ways in, on web and mobile alike — there is no password anywhere in the system.
+Three ways in, on web and mobile alike. All resolve to the same account for a given
+email address.
 
-| Method            | Web                                    | Mobile                                        |
-| ----------------- | -------------------------------------- | --------------------------------------------- |
+| Method            | Web                                        | Mobile                                         |
+| ----------------- | ------------------------------------------ | ---------------------------------------------- |
+| **Password**      | `signIn("password")` → session cookie      | `POST /api/mobile/login` → bearer token        |
+| **One-time code** | `POST /api/otp` → `signIn("otp")`          | `POST /api/mobile/otp/request` → `/verify`     |
 | **Google**        | Auth.js `google` provider → session cookie | `POST /api/mobile/oauth/google` → bearer token |
-| **One-time code** | `POST /api/otp` → `signIn("otp")`      | `POST /api/mobile/otp/request` → `/verify`     |
 
-Both methods create the account on first use, so sign-in and sign-up are one flow — `/register`
-exists only to give the marketing CTAs a sign-up-flavored landing page.
+Codes and social sign-on create the account on first use; only the password route needs
+an explicit sign-up (`/register` → `POST /api/register`). Accounts created by code or by
+Google have `User.password` null and can't use the password tab until one is set — there
+is no reset flow, so a one-time code is also the account-recovery path.
 
 **Enabling Google.** Step-by-step walkthrough: [`docs/GOOGLE_SIGNIN_SETUP.md`](./docs/GOOGLE_SIGNIN_SETUP.md). In short, create an OAuth client in the [Google Cloud Console](https://console.cloud.google.com/auth/clients):
 

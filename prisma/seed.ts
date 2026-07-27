@@ -1,19 +1,19 @@
 import { PrismaClient, DealStage } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 async function main() {
   const email = "demo@tapcard.app";
+  const password = await bcrypt.hash("password123", 10);
 
-  // Passwordless, like every other account. To sign in as the demo user, enter
-  // this address on /login and read the one-time code from the server console
-  // (lib/otp.ts prints it whenever EMAIL_SERVER is unset).
   const user = await prisma.user.upsert({
     where: { email },
     update: {},
     create: {
       email,
       name: "Jordan Avery",
+      password,
       emailVerified: new Date(),
     },
   });
@@ -134,7 +134,7 @@ async function main() {
     ),
   );
 
-  console.log(`\n✅ Seeded demo account:\n   email: ${email}\n   sign in: enter that email on /login, then use the OTP printed here\n   public card: /c/${card.slug}\n`);
+  console.log(`\n✅ Seeded demo account:\n   email: ${email}\n   password: password123\n   public card: /c/${card.slug}\n`);
 }
 
 main()
