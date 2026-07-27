@@ -281,17 +281,18 @@ model Lead {
 }
 
 model Contact {
-  id       String  @id @default(cuid())
-  userId   String
-  name     String
-  company  String?
-  position String?
-  email    String?
-  phone    String?
-  whatsapp String?
-  address  String?
-  notes    String? @db.Text
-  tags     String?
+  id        String  @id @default(cuid())
+  userId    String
+  name      String
+  company   String?
+  position  String?
+  email     String?
+  phone     String?
+  whatsapp  String?
+  address   String?
+  notes     String? @db.Text
+  tags      String?
+  avatarUrl String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

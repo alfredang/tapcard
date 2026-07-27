@@ -25,6 +25,30 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { toast } from "@/components/ui/toast";
 import { relativeTime } from "@/lib/utils";
+import { initials } from "@/lib/avatar";
+
+/** Contact avatar with a coloured initials fallback when no image is set. */
+function ContactAvatar({ name, src }: { name: string; src?: string | null }) {
+  if (src) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={src}
+        alt=""
+        loading="lazy"
+        className="border-border h-10 w-10 shrink-0 rounded-full border object-cover"
+      />
+    );
+  }
+  return (
+    <span
+      aria-hidden="true"
+      className="bg-primary/10 text-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-semibold"
+    >
+      {initials(name)}
+    </span>
+  );
+}
 
 export interface ContactRow {
   id: string;
@@ -37,6 +61,7 @@ export interface ContactRow {
   address: string | null;
   notes: string | null;
   tags: string | null;
+  avatarUrl: string | null;
   createdAt: string;
 }
 
@@ -238,14 +263,17 @@ export function ContactsClient({
                 const tags = parseTags(c.tags);
                 return (
                   <Surface key={c.id} className="flex flex-col p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="min-w-0">
-                        <p className="truncate font-semibold">{c.name}</p>
-                        {(c.position || c.company) && (
-                          <p className="truncate text-xs text-muted-foreground">
-                            {[c.position, c.company].filter(Boolean).join(" · ")}
-                          </p>
-                        )}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <ContactAvatar name={c.name} src={c.avatarUrl} />
+                        <div className="min-w-0">
+                          <p className="truncate font-semibold">{c.name}</p>
+                          {(c.position || c.company) && (
+                            <p className="truncate text-xs text-muted-foreground">
+                              {[c.position, c.company].filter(Boolean).join(" · ")}
+                            </p>
+                          )}
+                        </div>
                       </div>
                       <div className="flex gap-1">
                         <button

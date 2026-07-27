@@ -1,22 +1,34 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export function ThemeToggle() {
-  const [light, setLight] = useState(false);
+// The theme class is applied by an inline script before paint, so the DOM is
+// the source of truth. useSyncExternalStore reads it without a setState-in-
+// effect cascade, and renders `false` on the server to match the SSR markup.
+function subscribe(onChange: () => void) {
+  const observer = new MutationObserver(onChange);
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["class"],
+  });
+  return () => observer.disconnect();
+}
 
-  useEffect(() => {
-    setLight(document.documentElement.classList.contains("light"));
-  }, []);
+export function ThemeToggle() {
+  const dark = useSyncExternalStore(
+    subscribe,
+    () => document.documentElement.classList.contains("dark"),
+    () => false,
+  );
 
   function toggle() {
-    const next = !light;
-    setLight(next);
-    document.documentElement.classList.toggle("light", next);
+    const next = !dark;
+    // The observer above picks the class change up and re-renders the icon.
+    document.documentElement.classList.toggle("dark", next);
     try {
-      localStorage.setItem("theme", next ? "light" : "dark");
+      localStorage.setItem("theme", next ? "dark" : "light");
     } catch {}
   }
 
@@ -28,7 +40,7 @@ export function ThemeToggle() {
       aria-label="Toggle theme"
       title="Toggle theme"
     >
-      {light ? <Moon /> : <Sun />}
+      {dark ? <Sun /> : <Moon />}
     </Button>
   );
 }

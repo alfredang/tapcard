@@ -45,7 +45,7 @@ export function ContactForm() {
     return (
       <Surface className="flex flex-col items-center gap-3 p-10 text-center">
         <CheckCircle2 className="h-12 w-12 text-success" />
-        <h3 className="text-lg font-semibold">Thanks — we&apos;ll be in touch!</h3>
+        <h3 className="text-lg font-semibold">Thanks, we&apos;ll be in touch!</h3>
         <p className="text-sm text-muted-foreground">
           Our team will reach out within one business day.
         </p>

@@ -16,11 +16,72 @@ import { Button } from "@/components/ui/button";
 import { Surface, Badge } from "@/components/ui/card";
 import { CardView } from "@/components/card/card-view";
 import { ContactForm } from "@/components/marketing/contact-form";
+import { LeadMagnet } from "@/components/marketing/lead-magnet";
+import { avatarUrl } from "@/lib/avatar";
 import { THEME_LIST } from "@/lib/themes";
 import type { CardData } from "@/lib/card";
 
 export const metadata = {
-  title: "Tapcard — Replace Paper Business Cards with Smart Digital Cards",
+  title: "Digital Business Cards with a Built-in CRM",
+  description:
+    "Replace paper business cards with smart digital cards. Share by QR code, save to contacts, capture leads and manage your pipeline. Free plan, no app required.",
+  alternates: { canonical: "/" },
+};
+
+// Structured data helps Google render rich results for the product and the FAQ.
+const JSON_LD = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      name: "Tapcard",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web, iOS",
+      url: "https://tapcard.tertiaryinfotech.com",
+      description:
+        "Smart digital business cards with a built-in CRM. Share by QR code, capture leads and manage your sales pipeline.",
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "USD",
+        description: "Free plan with one digital card, QR code and lead capture.",
+      },
+      publisher: {
+        "@type": "Organization",
+        name: "Tertiary Infotech Academy Pte Ltd",
+        url: "https://www.tertiaryinfotech.com/",
+      },
+    },
+    {
+      "@type": "FAQPage",
+      mainEntity: [
+        {
+          "@type": "Question",
+          name: "What is a digital business card?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "A digital business card is a shareable web profile holding your contact details, links and branding. You share it by QR code or link, and the recipient saves you to their contacts without needing an app.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Does the person receiving my card need an app?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "No. Your card opens in any browser and saves to iPhone, Android, Google and Outlook contacts as a standard VCF file.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Is Tapcard free?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Yes. The free plan includes one digital card, QR code sharing, a lead capture form and basic analytics, with no card required.",
+          },
+        },
+      ],
+    },
+  ],
 };
 
 const demoCard: CardData = {
@@ -54,7 +115,7 @@ const FEATURES = [
   {
     icon: MessageCircle,
     title: "WhatsApp Integration",
-    desc: "Message, request a quote, or get support — all from a single tap on your card.",
+    desc: "Message, request a quote, or get support, all from a single tap on your card.",
   },
   {
     icon: LayoutGrid,
@@ -75,7 +136,7 @@ const FEATURES = [
 
 const STEPS = [
   { n: "1", title: "Create your card", desc: "Add your details with our 2-minute wizard." },
-  { n: "2", title: "Share via QR code", desc: "Tap, scan or send a link — anywhere." },
+  { n: "2", title: "Share via QR code", desc: "Tap, scan or send a link, anywhere." },
   { n: "3", title: "Capture leads", desc: "Visitors save your contact and submit their info." },
   { n: "4", title: "Manage customers", desc: "Nurture every lead in the built-in CRM." },
 ];
@@ -94,20 +155,20 @@ const TESTIMONIALS = [
   {
     quote:
       "We replaced 2,000 paper cards across our sales team. Lead capture tripled in a quarter.",
-    name: "Daniela M.",
-    role: "VP Sales, Helix",
+    name: "Wei Ling Tan",
+    role: "VP Sales, Marina Capital",
   },
   {
     quote:
       "Setup took two minutes. The CRM means I never lose a lead from an event again.",
-    name: "Marcus L.",
-    role: "Realtor",
+    name: "Marcus Lee",
+    role: "Realtor, Brightline",
   },
   {
     quote:
-      "The QR + WhatsApp combo is a conversation starter at every meeting. Clients love it.",
-    name: "Priya N.",
-    role: "Consultant",
+      "The QR and WhatsApp combo starts a conversation at every meeting. Clients love it.",
+    name: "Priya Nair",
+    role: "Consultant, Nimbus",
   },
 ];
 
@@ -146,6 +207,11 @@ const PRICING = [
 export default function LandingPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+      />
+
       {/* Hero */}
       <section className="grid-bg relative overflow-hidden">
         <div className="pointer-events-none absolute -top-40 left-1/2 h-96 w-[42rem] -translate-x-1/2 rounded-full bg-primary/20 blur-[120px]" />
@@ -160,7 +226,7 @@ export default function LandingPage() {
             </h1>
             <p className="mt-5 max-w-lg text-lg text-muted-foreground">
               Create, share, capture leads, and manage customer relationships
-              from a single platform — and publish a professional card in under
+              from a single platform, and publish a professional card in under
               two minutes.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
@@ -196,7 +262,7 @@ export default function LandingPage() {
         <SectionHeading
           eyebrow="Everything you need"
           title="One platform, end to end"
-          subtitle="From the first tap to a closed deal — Tapcard handles sharing, capture and CRM."
+          subtitle="From the first tap to a closed deal. Tapcard handles sharing, capture and CRM."
         />
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((f) => (
@@ -235,7 +301,7 @@ export default function LandingPage() {
         <SectionHeading
           eyebrow="Templates"
           title="Six themes. Endless brands."
-          subtitle="Corporate, Modern, Minimalist, Dark, Creative and Luxury — built for every profession."
+          subtitle="Corporate, Modern, Minimalist, Dark, Creative and Luxury, built for every profession."
         />
         <div className="mt-8 flex flex-wrap justify-center gap-2">
           {TEMPLATE_CATEGORIES.map((c) => (
@@ -269,15 +335,29 @@ export default function LandingPage() {
                   ))}
                 </div>
                 <p className="text-sm leading-relaxed">“{t.quote}”</p>
-                <div className="mt-4 text-sm">
-                  <p className="font-semibold">{t.name}</p>
-                  <p className="text-muted-foreground">{t.role}</p>
+                <div className="mt-4 flex items-center gap-3 text-sm">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={avatarUrl(t.name)}
+                    alt=""
+                    loading="lazy"
+                    width={40}
+                    height={40}
+                    className="border-border h-10 w-10 shrink-0 rounded-full border"
+                  />
+                  <div>
+                    <p className="font-semibold">{t.name}</p>
+                    <p className="text-muted-foreground">{t.role}</p>
+                  </div>
                 </div>
               </Surface>
             ))}
           </div>
         </div>
       </section>
+
+      {/* Lead magnet */}
+      <LeadMagnet />
 
       {/* Pricing */}
       <section id="pricing" className="mx-auto max-w-6xl px-4 py-20">

@@ -1,47 +1,53 @@
 @import "tailwindcss";
 
 /*
-  Design system — dark-theme-default SaaS aesthetic with glassmorphism.
-  Light theme is opt-in via the `.light` class on <html> (toggled client-side).
+  Design system — light-default, vivid-gradient SaaS aesthetic.
+  The brand violet is kept as the primary and paired with a coral and a teal
+  secondary so sections can alternate colour without losing brand identity.
+  Dark theme is opt-in via the `.dark` class on <html> (toggled client-side).
   Colors are authored as HSL channels so Tailwind `/<alpha>` opacity works.
 */
 
 :root {
-  /* dark theme (default) */
-  --background: 222 47% 5%;
-  --surface: 222 40% 8%;
-  --surface-2: 222 36% 11%;
-  --foreground: 210 40% 98%;
-  --muted: 217 25% 14%;
-  --muted-foreground: 215 18% 62%;
-  --border: 217 28% 17%;
-  --input: 217 28% 16%;
-  --ring: 252 90% 66%;
+  /* light theme (default) */
+  --background: 270 60% 99%;
+  --surface: 0 0% 100%;
+  --surface-2: 268 44% 97%;
+  --foreground: 258 46% 12%;
+  --muted: 265 34% 95%;
+  --muted-foreground: 258 14% 42%;
+  --border: 264 32% 90%;
+  --input: 264 30% 92%;
+  --ring: 252 90% 62%;
 
-  --primary: 252 90% 66%;
+  --primary: 252 90% 62%;
   --primary-foreground: 0 0% 100%;
-  --accent: 280 85% 65%;
+  --accent: 8 92% 66%;
   --accent-foreground: 0 0% 100%;
+  /* third hue, used for alternating sections and chart/stat accents */
+  --highlight: 172 78% 40%;
+  --highlight-foreground: 0 0% 100%;
 
-  --success: 152 60% 45%;
-  --warning: 38 92% 55%;
-  --danger: 0 75% 60%;
+  --success: 152 62% 38%;
+  --warning: 33 92% 48%;
+  --danger: 0 74% 54%;
 
   --radius: 0.85rem;
 }
 
-.light {
-  --background: 220 33% 98%;
-  --surface: 0 0% 100%;
-  --surface-2: 220 25% 96%;
-  --foreground: 222 47% 11%;
-  --muted: 220 20% 94%;
-  --muted-foreground: 220 12% 42%;
-  --border: 220 20% 88%;
-  --input: 220 20% 90%;
-  --ring: 252 90% 60%;
-  --primary: 252 83% 58%;
-  --accent: 280 75% 56%;
+.dark {
+  --background: 258 44% 6%;
+  --surface: 258 38% 9%;
+  --surface-2: 258 34% 13%;
+  --foreground: 264 40% 98%;
+  --muted: 258 24% 16%;
+  --muted-foreground: 258 16% 68%;
+  --border: 258 26% 20%;
+  --input: 258 26% 18%;
+  --ring: 252 92% 70%;
+  --primary: 252 92% 70%;
+  --accent: 8 90% 68%;
+  --highlight: 172 70% 46%;
 }
 
 @theme inline {
