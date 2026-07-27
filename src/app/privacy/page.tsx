@@ -42,8 +42,9 @@ export default function PrivacyPage() {
           <Section title="Information we collect">
             <ul className="list-disc space-y-1 pl-5">
               <li>
-                <span className="text-foreground">Account information</span> — your name, email
-                address, and a securely hashed password when you create an account.
+                <span className="text-foreground">Account information</span> — your name and email
+                address. Tapcard is passwordless: you sign in with Google or a one-time code sent
+                to your email, so we never store a password for you.
               </li>
               <li>
                 <span className="text-foreground">Card content</span> — the details you add to your
@@ -110,8 +111,9 @@ export default function PrivacyPage() {
           <Section title="Security">
             <p>
               We use industry-standard measures to protect your data, including encrypted transport
-              (HTTPS), hashed passwords, and access controls. No method of transmission or storage is
-              100% secure, but we work continuously to protect your information.
+              (HTTPS), passwordless sign-in, short-lived single-use login codes, and access controls.
+              No method of transmission or storage is 100% secure, but we work continuously to
+              protect your information.
             </p>
           </Section>
 

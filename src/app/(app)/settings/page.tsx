@@ -69,8 +69,8 @@ export default async function SettingsPage() {
             <h2 className="font-semibold">Sign-in methods</h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            Your account signs in with email &amp; password or a one-time email code.
-            Google, Microsoft and LinkedIn single sign-on are also supported.
+            Tapcard is passwordless. Sign in with Google, or have a one-time code
+            emailed to you — there is no password to set, forget or leak.
           </p>
         </Card>
       </div>
