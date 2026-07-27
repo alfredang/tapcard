@@ -12,11 +12,12 @@
 [![Claude](https://img.shields.io/badge/AI-Claude%20Agent%20SDK-D97757?logo=anthropic&logoColor=white)](https://www.anthropic.com)
 [![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com)
 [![App Store](https://img.shields.io/badge/App%20Store-Available-0D96F6?logo=appstore&logoColor=white)](https://apps.apple.com/us/app/tertiary-tapcard/id6780261599)
+[![Live Demo](https://img.shields.io/badge/Live-tapcard.tertiaryinfotech.com-22C55E?logo=vercel&logoColor=white)](https://tapcard.tertiaryinfotech.com/)
 
 **Replace paper business cards with smart digital cards.**
 Create, share, capture leads, and manage customer relationships — all in one platform.
 
-[Download on the App Store](https://apps.apple.com/us/app/tertiary-tapcard/id6780261599) · [Report Bug](https://github.com/alfredang/tapcard/issues) · [Request Feature](https://github.com/alfredang/tapcard/issues)
+[Live Site](https://tapcard.tertiaryinfotech.com/) · [Download on the App Store](https://apps.apple.com/us/app/tertiary-tapcard/id6780261599) · [Report Bug](https://github.com/alfredang/tapcard/issues) · [Request Feature](https://github.com/alfredang/tapcard/issues)
 
 </div>
 
@@ -50,6 +51,14 @@ relationship.
 | 🤖  | **AI**               | Bio / about generation and lead scoring via the **Claude Agent SDK** (subscription — no API key).                        |
 | 📈  | **Analytics**        | Card views, QR scans, downloads and click tracking with an engagement dashboard.                                         |
 | 🔐  | **Auth**             | Email + password, one-time email codes, and Google SSO. (Microsoft / LinkedIn SSO auto-enable when configured.) |
+
+---
+
+## Live Site
+
+Tapcard is live in production:
+
+**[tapcard.tertiaryinfotech.com](https://tapcard.tertiaryinfotech.com/)**
 
 ---
 
