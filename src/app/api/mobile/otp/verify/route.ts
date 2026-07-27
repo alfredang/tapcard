@@ -8,7 +8,7 @@ import { rateLimit, clientIp, tooManyRequests } from "@/lib/rate-limit";
 // ─────────────────────────────────────────────────────────────────────────────
 // Mobile OTP verify — checks the emailed code, then signs the user in. Creates
 // a passwordless account on first use (find-or-create), so one flow covers both
-// sign-in and sign-up. Returns the same bearer token shape as /mobile/login.
+// sign-in and sign-up. Returns the same bearer token shape as /mobile/oauth/google.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const schema = z.object({

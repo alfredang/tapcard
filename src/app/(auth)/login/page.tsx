@@ -1,8 +1,8 @@
 import { enabledOAuth } from "@/auth";
-import { LoginForm } from "@/components/auth/login-form";
+import { AuthForm } from "@/components/auth/auth-form";
 
 export const metadata = { title: "Sign in — Tapcard" };
 
 export default function LoginPage() {
-  return <LoginForm oauth={enabledOAuth} />;
+  return <AuthForm mode="login" oauth={enabledOAuth} />;
 }

@@ -49,7 +49,7 @@ relationship.
 | 🍎  | **iOS app**          | Tertiary Tapcard is available on the App Store for iPhone users.                                                         |
 | 🤖  | **AI**               | Bio / about generation and lead scoring via the **Claude Agent SDK** (subscription — no API key).                        |
 | 📈  | **Analytics**        | Card views, QR scans, downloads and click tracking with an engagement dashboard.                                         |
-| 🔐  | **Auth**             | Email + password, email OTP, and Google / Microsoft / LinkedIn SSO (auto-enabled when configured).                       |
+| 🔐  | **Auth**             | Passwordless — Google SSO and one-time email codes. No password is ever stored. (Microsoft / LinkedIn SSO auto-enable when configured.) |
 
 ---
 
@@ -69,7 +69,7 @@ Tertiary Tapcard is now available on the App Store:
 | **Forms & Validation** | React Hook Form, Zod                                                          |
 | **Backend**            | Next.js Route Handlers, Prisma ORM                                            |
 | **Database**           | PostgreSQL 16                                                                 |
-| **Auth**               | Auth.js (NextAuth v5) — credentials, OTP, OAuth                               |
+| **Auth**               | Auth.js (NextAuth v5) — OAuth + email OTP; bearer tokens for mobile           |
 | **AI / LLM**           | Claude Agent SDK (`@anthropic-ai/claude-agent-sdk`) — subscription auth       |
 | **UI / Interaction**   | dnd-kit (Kanban), qrcode, lucide-react                                        |
 | **Deployment**         | Docker, Coolify, Vercel-compatible                                            |
@@ -160,7 +160,7 @@ Open **http://localhost:3000**
 
 |                      |                                      |
 | -------------------- | ------------------------------------ |
-| **Demo login**       | `demo@tapcard.app` / `password123`   |
+| **Demo login**       | `demo@tapcard.app` (code in console) |
 | **Demo public card** | http://localhost:3000/c/jordan-avery |
 
 > Email OTP codes are printed to the **server console** in dev (no email server required).
@@ -198,7 +198,31 @@ Runs Postgres + the app (Next.js standalone output) together.
 ### Environment variables
 
 See [`.env.example`](./.env.example). Key ones: `DATABASE_URL`, `AUTH_SECRET`, `NEXT_PUBLIC_APP_URL`,
-the optional `GOOGLE_/MICROSOFT_/LINKEDIN_CLIENT_ID/SECRET`, and `CLAUDE_CODE_OAUTH_TOKEN`.
+`GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`, the optional
+`MICROSOFT_/LINKEDIN_CLIENT_ID/SECRET`, and `CLAUDE_CODE_OAUTH_TOKEN`.
+
+### Sign-in
+
+Two ways in, on web and mobile alike — there is no password anywhere in the system.
+
+| Method            | Web                                    | Mobile                                        |
+| ----------------- | -------------------------------------- | --------------------------------------------- |
+| **Google**        | Auth.js `google` provider → session cookie | `POST /api/mobile/oauth/google` → bearer token |
+| **One-time code** | `POST /api/otp` → `signIn("otp")`      | `POST /api/mobile/otp/request` → `/verify`     |
+
+Both methods create the account on first use, so sign-in and sign-up are one flow — `/register`
+exists only to give the marketing CTAs a sign-up-flavored landing page.
+
+**Enabling Google.** Step-by-step walkthrough: [`docs/GOOGLE_SIGNIN_SETUP.md`](./docs/GOOGLE_SIGNIN_SETUP.md). In short, create an OAuth client in the [Google Cloud Console](https://console.cloud.google.com/auth/clients):
+
+- **Web** — authorized redirect URI `https://<your-domain>/api/auth/callback/google` (and
+  `http://localhost:3000/api/auth/callback/google` for dev). Put the pair in `GOOGLE_CLIENT_ID` /
+  `GOOGLE_CLIENT_SECRET`. The button appears on `/login` automatically once both are set.
+- **iOS / Android** — create a client per platform. The native SDK returns an ID token; the app posts
+  it as `{ "idToken": "..." }` to `/api/mobile/oauth/google`. List those platform client IDs,
+  comma-separated, in `GOOGLE_MOBILE_CLIENT_IDS` — the server checks the token's `aud` against them
+  and **refuses all native sign-ins while that variable is unset**, since without it any Google app's
+  token would be accepted.
 
 ---
 

@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { getMobileUserId } from "@/lib/mobile-auth";
@@ -18,8 +17,8 @@ import { getMobileUserId } from "@/lib/mobile-auth";
 //      analytics events; leads keep their row with cardId nulled),
 //   2. revokes any OAuth links + active sessions,
 //   3. tombstones the email (frees the original address for re-signup) and nulls
-//      name / image / password / emailVerified so neither password nor OTP login
-//      can reach the old account.
+//      name / image / emailVerified so neither Google nor OTP sign-in can reach
+//      the old account.
 //
 // AUTH — two accepted proofs of ownership, checked in order:
 //   Path 1 (preferred): a valid `Authorization: Bearer <token>` — deletes THAT
@@ -35,8 +34,6 @@ const deleteSchema = z.object({
   // Only needed for the legacy shared-key path; the token path uses the token's
   // own user id, so email is optional here.
   email: z.string().trim().email("A valid email is required").optional(),
-  // Optional — the app only has the password for accounts it created itself.
-  password: z.string().optional(),
 });
 
 /** Deletes cards/accounts/sessions and tombstones the user, in one transaction. */
@@ -100,14 +97,6 @@ export async function POST(req: Request) {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
     return NextResponse.json({ ok: true, alreadyDeleted: true });
-  }
-
-  // Defense in depth: if a password is supplied and the account has one, it must match.
-  if (parsed.data.password && user.password) {
-    const ok = await bcrypt.compare(parsed.data.password, user.password);
-    if (!ok) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
-    }
   }
 
   await deleteAndTombstone(user.id);

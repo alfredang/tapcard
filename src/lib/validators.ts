@@ -119,17 +119,6 @@ export const dealSchema = z.object({
 
 export type DealInput = z.infer<typeof dealSchema>;
 
-export const registerSchema = z.object({
-  name: z.string().trim().min(1, "Name is required").max(120),
-  email: z.string().trim().email("Enter a valid email"),
-  password: z.string().min(8, "Use at least 8 characters").max(100),
-});
-
-export const loginSchema = z.object({
-  email: z.string().trim().email("Enter a valid email"),
-  password: z.string().min(1, "Password is required"),
-});
-
 export const contactFormSchema = z.object({
   name: z.string().trim().min(1).max(120),
   company: optionalStr,

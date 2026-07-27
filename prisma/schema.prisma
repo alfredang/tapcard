@@ -94,7 +94,10 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   image         String?
-  password      String? // bcrypt hash; null for OAuth-only accounts
+  // DEPRECATED — Tapcard is passwordless (Google SSO + emailed one-time code).
+  // Nothing reads or writes this except account deletion, which nulls it. Kept
+  // only so the column drop is a deliberate, separate migration.
+  password      String?
   // Google Calendar connection (separate from sign-in): a stored refresh token
   // lets the server insert appointments into the user's own Google Calendar.
   googleCalRefresh String?
