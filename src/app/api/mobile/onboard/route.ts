@@ -14,7 +14,7 @@ import { getMobileUserId } from "@/lib/mobile-auth";
 //   2. creates a published digital business card from the scanned fields,
 //   3. returns the public card slug + URL
 //
-// Accounts created here are passwordless: the owner claims the account later by
+// Accounts created here have no password: the owner claims the account later by
 // signing in with Google or an emailed one-time code on the same address.
 //
 // This lets the app turn a snapshot of a paper business card into a live

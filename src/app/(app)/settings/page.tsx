@@ -69,8 +69,9 @@ export default async function SettingsPage() {
             <h2 className="font-semibold">Sign-in methods</h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            Tapcard is passwordless. Sign in with Google, or have a one-time code
-            emailed to you — there is no password to set, forget or leak.
+            Sign in with a password, a one-time code emailed to you, or Google.
+            Accounts created with a code or with Google have no password until
+            you set one.
           </p>
         </Card>
       </div>

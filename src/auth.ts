@@ -4,14 +4,39 @@ import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
 import LinkedIn from "next-auth/providers/linkedin";
+import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { verifyOtp } from "@/lib/otp";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Tapcard has exactly two ways in: social sign-on and a one-time email code.
-// There is no password anywhere in the system — `User.password` is retained in
-// the schema only so existing rows aren't destroyed, and nothing reads it.
+// Three ways in, all landing on the same account for a given email address:
+// a password, a one-time emailed code, or social sign-on.
+//
+// Accounts created by OTP or OAuth have `User.password` null and simply can't
+// use the password tab until they set one; that's why the password provider
+// bails on `!user.password` rather than treating it as a mismatch.
 // ─────────────────────────────────────────────────────────────────────────────
+
+// Both credential providers below verify with bcrypt, which costs ~100ms of CPU
+// by design. Auth.js owns /api/auth/* so there's no route handler to throttle,
+// and unthrottled that is two problems at once: unlimited password guesses
+// against an address printed on a business card, and a cheap way to saturate a
+// single-threaded Node process. The equivalent mobile routes cap attempts, so
+// these do too. Checked BEFORE any hashing, or the limiter would burn the CPU
+// it exists to protect.
+//
+// Per-email catches someone grinding one account; per-IP catches someone
+// spraying many. Note the limiter is in-memory (see lib/rate-limit.ts): counters
+// reset on redeploy and are per-instance, so this is abuse dampening, not a hard
+// guarantee.
+function attemptAllowed(kind: string, request: unknown, email: string): boolean {
+  const byEmail = rateLimit(`web:${kind}:email:${email}`, 10, 10 * 60_000);
+  if (!byEmail.ok) return false;
+
+  const ip = request instanceof Request ? clientIp(request) : "unknown";
+  return rateLimit(`web:${kind}:ip:${ip}`, 30, 10 * 60_000).ok;
+}
 
 // OAuth providers are added only when their credentials exist in env, so the
 // app builds and runs with zero external secrets. Google is the provider we
@@ -70,13 +95,32 @@ const config: NextAuthConfig = {
   providers: [
     ...oauthProviders,
     Credentials({
+      id: "password",
+      name: "Email & Password",
+      credentials: { email: {}, password: {} },
+      async authorize(creds, request) {
+        const email = String(creds?.email || "").toLowerCase();
+        const password = String(creds?.password || "");
+        if (!email || !password) return null;
+        if (!attemptAllowed("password", request, email)) return null;
+        const user = await prisma.user.findUnique({ where: { email } });
+        // No password set = an OTP/OAuth-only account, not a wrong password.
+        if (!user?.password) return null;
+        const ok = await bcrypt.compare(password, user.password);
+        if (!ok) return null;
+        return { id: user.id, name: user.name, email: user.email, image: user.image };
+      },
+    }),
+    Credentials({
       id: "otp",
       name: "Email OTP",
       credentials: { email: {}, code: {} },
-      async authorize(creds) {
+      async authorize(creds, request) {
         const email = String(creds?.email || "").toLowerCase();
         const code = String(creds?.code || "");
         if (!email || !code) return null;
+        // Caps guesses at a 6-digit code, matching /api/mobile/otp/verify.
+        if (!attemptAllowed("otp", request, email)) return null;
         const valid = await verifyOtp(email, code);
         if (!valid) return null;
         // Upsert a user so first-time OTP logins create an account.
