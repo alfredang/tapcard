@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { UserPlus, Loader2, CheckCircle2, Share2, Check } from "lucide-react";
+import { UserPlus, Loader2, CheckCircle2, Share2, Check, QrCode, X } from "lucide-react";
 import { CardView } from "@/components/card/card-view";
 import { getTheme } from "@/lib/themes";
+import { qrDataUrl } from "@/lib/qr";
 import { appUrl } from "@/lib/utils";
 import { WHATSAPP_PRESETS, whatsappLink } from "@/lib/whatsapp";
 import { toast } from "@/components/ui/toast";
@@ -17,6 +18,18 @@ export function PublicCard({ card }: { card: CardData }) {
   const search = useSearchParams();
   const [showLead, setShowLead] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showQr, setShowQr] = useState(false);
+  const [qr, setQr] = useState<string>();
+
+  // Render the QR lazily, the first time the modal opens.
+  useEffect(() => {
+    if (!showQr || qr) return;
+    qrDataUrl(appUrl(`/c/${slug}?src=qr`), {
+      dark: "#19112d",
+      light: "#ffffff",
+      width: 640,
+    }).then(setQr);
+  }, [showQr, qr, slug]);
 
   // Fire analytics on mount: a view, plus a QR scan when arriving via ?src=qr.
   useEffect(() => {
@@ -69,6 +82,17 @@ export function PublicCard({ card }: { card: CardData }) {
 
         <div className="flex gap-2">
           <button
+            onClick={() => setShowQr(true)}
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium"
+            style={{
+              background: t.chipBg,
+              color: t.text,
+              border: `1px solid ${t.cardBorder}`,
+            }}
+          >
+            <QrCode className="h-4 w-4" /> QR code
+          </button>
+          <button
             onClick={share}
             className="flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium"
             style={{
@@ -97,6 +121,39 @@ export function PublicCard({ card }: { card: CardData }) {
           )}
         </div>
       </div>
+
+      {/* Fullscreen QR — show the phone, get scanned, done. */}
+      {showQr && (
+        <div
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/70 px-6 backdrop-blur-sm"
+          onClick={() => setShowQr(false)}
+          role="dialog"
+          aria-label="QR code"
+        >
+          <div
+            className="w-full max-w-xs rounded-3xl bg-white p-6 text-center shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {qr ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={qr} alt={`QR code for ${card.fullName}'s card`} className="mx-auto w-full rounded-xl" />
+            ) : (
+              <div className="flex aspect-square items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-black/30" />
+              </div>
+            )}
+            <p className="mt-3 text-base font-semibold text-black">{card.fullName}</p>
+            <p className="mt-0.5 text-xs text-black/50">Scan to get my card</p>
+          </div>
+          <button
+            onClick={() => setShowQr(false)}
+            aria-label="Close"
+            className="mt-6 flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

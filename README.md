@@ -40,14 +40,14 @@ relationship.
 
 |     | Feature              | Description                                                                                                              |
 | --- | -------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| 🪪  | **Card Builder**     | Canva-style 3-panel editor (content · live preview · design) with instant preview, autosave, 6 themes and accent colors. |
-| 🌐  | **Public cards**     | Themed, mobile-first card pages at `/c/<slug>` with Save-Contact, Call, WhatsApp, Email, Website and social links.       |
+| 🪪  | **Card Builder**     | Canva-style 3-panel editor (content · live preview · design) with instant preview, autosave, 20 themes and accent colors. |
+| 🌐  | **Public cards**     | Blinq-style, mobile-first card pages at `/c/<slug>` — 20 themes, one-detail-per-row layout, full-screen QR, Save Contact, WhatsApp, socials and lead capture.       |
 | 📱  | **QR codes**         | Open card / save contact / WhatsApp / email / website, with color customization and PNG / SVG export.                    |
 | 📇  | **Save to Contacts** | One-tap vCard (VCF) export compatible with iPhone, Android, Google and Outlook.                                          |
 | 💬  | **WhatsApp**         | Message, request-a-quote and share deep links built in.                                                                  |
 | 🎯  | **Lead capture**     | Visitors leave their details straight from your card — leads flow into the CRM.                                          |
 | 📊  | **CRM**              | Contacts (CRUD, search, CSV export), leads inbox, and a drag-and-drop Kanban sales pipeline (7 stages).                  |
-| 🍎  | **iOS app**          | Tertiary Tapcard is available on the App Store for iPhone users.                                                         |
+| 🍎  | **iOS app**          | Tertiary Tapcard on the App Store — scan paper cards (single-shot, Apple Intelligence parsing), Apple/Google sign-in, QR sharing.                                                         |
 | 🤖  | **AI**               | Bio / about generation and lead scoring via the **Claude Agent SDK** (subscription — no API key).                        |
 | 📈  | **Analytics**        | Card views, QR scans, downloads and click tracking with an engagement dashboard.                                         |
 | 🔐  | **Auth**             | Email + password, one-time email codes, and Google SSO. (Microsoft / LinkedIn SSO auto-enable when configured.) |

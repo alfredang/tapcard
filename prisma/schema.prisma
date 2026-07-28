@@ -21,6 +21,20 @@ enum Theme {
   DARK
   CREATIVE
   LUXURY
+  OCEAN
+  FOREST
+  SUNSET
+  ROSE
+  INDIGO
+  TEAL
+  AMBER
+  CRIMSON
+  LAVENDER
+  MIDNIGHT
+  SKY
+  MINT
+  PEACH
+  GRAPHITE
 }
 
 enum Role {
