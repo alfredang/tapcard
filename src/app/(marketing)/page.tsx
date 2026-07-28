@@ -19,7 +19,7 @@ import { ContactForm } from "@/components/marketing/contact-form";
 import { LeadMagnet } from "@/components/marketing/lead-magnet";
 import { avatarUrl } from "@/lib/avatar";
 import { THEME_LIST } from "@/lib/themes";
-import type { CardData } from "@/lib/card";
+import { demoCard } from "@/lib/demo-card";
 
 export const metadata = {
   title: "Digital Business Cards with a Built-in CRM",
@@ -84,22 +84,7 @@ const JSON_LD = {
   ],
 };
 
-const demoCard: CardData = {
-  fullName: "Jordan Avery",
-  jobTitle: "Founder & Principal",
-  company: "Avery Growth",
-  tagline: "Turning ambitious goals into results.",
-  bio: "I help founders scale revenue with sharp positioning.",
-  mobile: "+14155550142",
-  whatsapp: "+14155550142",
-  email: "jordan@averygrowth.com",
-  website: "https://averygrowth.com",
-  linkedin: "https://linkedin.com/in/jordanavery",
-  instagram: "https://instagram.com/jordan.avery",
-  twitter: "https://x.com/jordanavery",
-  theme: "MODERN",
-  accentColor: "#7c5cff",
-};
+const FEATURED_THEMES = ["MODERN", "OCEAN", "LUXURY"];
 
 const FEATURES = [
   {
@@ -300,8 +285,8 @@ export default function LandingPage() {
       <section id="templates" className="mx-auto max-w-6xl px-4 py-20">
         <SectionHeading
           eyebrow="Templates"
-          title="Six themes. Endless brands."
-          subtitle="Corporate, Modern, Minimalist, Dark, Creative and Luxury, built for every profession."
+          title="20 themes. Endless brands."
+          subtitle="From boardroom Corporate to vivid Sunset - a look for every profession. Here are three favourites."
         />
         <div className="mt-8 flex flex-wrap justify-center gap-2">
           {TEMPLATE_CATEGORIES.map((c) => (
@@ -309,16 +294,26 @@ export default function LandingPage() {
           ))}
         </div>
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {THEME_LIST.map((theme) => (
-            <div key={theme.key} className="flex flex-col items-center gap-3">
-              <CardView
-                card={{ ...demoCard, theme: theme.key, accentColor: theme.accent }}
-              />
-              <span className="text-sm font-medium text-muted-foreground">
-                {theme.label}
-              </span>
-            </div>
-          ))}
+          {FEATURED_THEMES.map((key) => {
+            const theme = THEME_LIST.find((t) => t.key === key)!;
+            return (
+              <div key={theme.key} className="flex flex-col items-center gap-3">
+                <CardView
+                  card={{ ...demoCard, theme: theme.key, accentColor: theme.accent }}
+                />
+                <span className="text-sm font-medium text-muted-foreground">
+                  {theme.label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-10 text-center">
+          <Button asChild variant="outline" size="lg">
+            <Link href="/themes">
+              See all {THEME_LIST.length} themes <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
         </div>
       </section>
 
