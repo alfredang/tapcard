@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Surface, Badge } from "@/components/ui/card";
 import { CardView } from "@/components/card/card-view";
 import { ContactForm } from "@/components/marketing/contact-form";
+import { HeroCardShowcase } from "@/components/marketing/hero-card-showcase";
 import { LeadMagnet } from "@/components/marketing/lead-magnet";
 import { avatarUrl } from "@/lib/avatar";
 import { THEME_LIST } from "@/lib/themes";
@@ -200,21 +201,21 @@ export default function LandingPage() {
       {/* Hero */}
       <section className="grid-bg relative overflow-hidden">
         <div className="pointer-events-none absolute -top-40 left-1/2 h-96 w-[42rem] -translate-x-1/2 rounded-full bg-primary/20 blur-[120px]" />
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 lg:grid-cols-2 lg:py-24">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-10 lg:grid-cols-2 lg:py-14">
           <div>
-            <Badge tone="primary" className="mb-5">
+            <Badge tone="primary" className="mb-4">
               <Zap className="h-3 w-3" /> Digital Business Cards + CRM
             </Badge>
             <h1 className="text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
               Replace paper cards with{" "}
               <span className="gradient-text">smart digital cards</span>
             </h1>
-            <p className="mt-5 max-w-lg text-lg text-muted-foreground">
+            <p className="mt-4 max-w-lg text-lg text-muted-foreground">
               Create, share, capture leads, and manage customer relationships
               from a single platform, and publish a professional card in under
               two minutes.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-6 flex flex-wrap gap-3">
               <Button size="lg" asChild>
                 <Link href="/register">
                   Create free card <ArrowRight className="h-4 w-4" />
@@ -224,7 +225,7 @@ export default function LandingPage() {
                 <a href="#contact">Book a demo</a>
               </Button>
             </div>
-            <div className="mt-8 flex items-center gap-6 text-sm text-muted-foreground">
+            <div className="mt-6 flex items-center gap-6 text-sm text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <Check className="h-4 w-4 text-success" /> No app required
               </span>
@@ -234,11 +235,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="relative mx-auto w-full max-w-sm">
-            <div className="animate-float">
-              <CardView card={demoCard} />
-            </div>
-          </div>
+          <HeroCardShowcase />
         </div>
       </section>
 

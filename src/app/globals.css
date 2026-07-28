@@ -148,3 +148,12 @@ body {
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
+
+@keyframes heroPan {
+  0%, 18% { transform: translateY(0); }
+  45%, 58% { transform: translateY(-190px); }
+  88%, 100% { transform: translateY(0); }
+}
+.hero-pan {
+  animation: heroPan 9s ease-in-out infinite;
+}
