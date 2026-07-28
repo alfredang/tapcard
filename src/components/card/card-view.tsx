@@ -234,7 +234,13 @@ export function CardView({
           );
         })}
         {card.address && (
-          <Row icon={MapPin} theme={t} accent={accent}>
+          <Row
+            icon={MapPin}
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(card.address)}`}
+            external
+            theme={t}
+            accent={accent}
+          >
             {card.address}
           </Row>
         )}
