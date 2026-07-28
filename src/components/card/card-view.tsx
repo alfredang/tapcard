@@ -93,7 +93,7 @@ export function CardView({
       }}
     >
       {/* Banner */}
-      <div className="relative h-32 w-full" style={{ background: t.bannerGradient }}>
+      <div className="relative h-36 w-full" style={{ background: t.bannerGradient }}>
         {card.coverBanner && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -131,7 +131,7 @@ export function CardView({
           )}
         </div>
 
-        <h1 className="mt-3 break-words text-2xl font-bold leading-tight">
+        <h1 className="mt-3 break-words text-[26px] font-bold leading-tight tracking-tight">
           {card.fullName || "Your Name"}
         </h1>
         {card.jobTitle && (
@@ -251,7 +251,7 @@ export function CardView({
             href={vcfHref}
             download
             onClick={() => onTrack?.("VCF_DOWNLOAD")}
-            className="flex w-full items-center justify-center gap-2 rounded-full py-3 text-sm font-semibold shadow-lg transition active:scale-[0.98]"
+            className="flex w-full items-center justify-center gap-2 rounded-full py-3.5 text-[15px] font-semibold shadow-xl transition hover:brightness-110 active:scale-[0.98]"
             style={{
               background: t.buttonBg,
               color: t.buttonText,

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { THEMES, type ThemeKey } from "@/lib/themes";
 
 // Shared validation schemas used by both client forms and API route handlers.
 
@@ -62,8 +63,10 @@ export const cardSchema = z.object({
   companyLogo: optionalImage,
   coverBanner: optionalImage,
 
+  // Derived from the theme registry so new templates are accepted without
+  // touching this file (a hardcoded 6-value enum silently rejected the rest).
   theme: z
-    .enum(["CORPORATE", "MODERN", "MINIMALIST", "DARK", "CREATIVE", "LUXURY"])
+    .enum(Object.keys(THEMES) as [ThemeKey, ...ThemeKey[]])
     .default("MODERN"),
   accentColor: z
     .string()
