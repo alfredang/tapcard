@@ -240,13 +240,13 @@ export default function LandingPage() {
       </section>
 
       {/* Features */}
-      <section id="features" className="mx-auto max-w-6xl px-4 py-20">
+      <section id="features" className="mx-auto max-w-6xl px-4 py-12">
         <SectionHeading
           eyebrow="Everything you need"
           title="One platform, end to end"
           subtitle="From the first tap to a closed deal. Tapcard handles sharing, capture and CRM."
         />
-        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((f) => (
             <Surface key={f.title} className="p-6 transition hover:border-primary/40">
               <div className="gradient-primary mb-4 flex h-11 w-11 items-center justify-center rounded-lg">
@@ -261,12 +261,12 @@ export default function LandingPage() {
 
       {/* How it works */}
       <section id="how" className="border-y border-border/60 bg-surface/30">
-        <div className="mx-auto max-w-6xl px-4 py-20">
+        <div className="mx-auto max-w-6xl px-4 py-12">
           <SectionHeading
             eyebrow="How it works"
             title="Live in four simple steps"
           />
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {STEPS.map((s) => (
               <div key={s.n} className="relative">
                 <div className="gradient-text text-5xl font-extrabold">{s.n}</div>
@@ -279,7 +279,7 @@ export default function LandingPage() {
       </section>
 
       {/* Templates */}
-      <section id="templates" className="mx-auto max-w-6xl px-4 py-20">
+      <section id="templates" className="mx-auto max-w-6xl px-4 py-12">
         <SectionHeading
           eyebrow="Templates"
           title="20 themes. Endless brands."
@@ -290,7 +290,7 @@ export default function LandingPage() {
             <Badge key={c}>{c}</Badge>
           ))}
         </div>
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURED_THEMES.map((key) => {
             const theme = THEME_LIST.find((t) => t.key === key)!;
             return (
@@ -305,7 +305,7 @@ export default function LandingPage() {
             );
           })}
         </div>
-        <div className="mt-10 text-center">
+        <div className="mt-8 text-center">
           <Button asChild variant="outline" size="lg">
             <Link href="/themes">
               See all {THEME_LIST.length} themes <ArrowRight className="h-4 w-4" />
@@ -316,9 +316,9 @@ export default function LandingPage() {
 
       {/* Testimonials */}
       <section className="border-y border-border/60 bg-surface/30">
-        <div className="mx-auto max-w-6xl px-4 py-20">
+        <div className="mx-auto max-w-6xl px-4 py-12">
           <SectionHeading eyebrow="Loved by teams" title="Results, not just cards" />
-          <div className="mt-12 grid gap-5 md:grid-cols-3">
+          <div className="mt-8 grid gap-5 md:grid-cols-3">
             {TESTIMONIALS.map((t) => (
               <Surface key={t.name} className="p-6">
                 <div className="mb-3 flex gap-0.5 text-warning">
@@ -352,12 +352,12 @@ export default function LandingPage() {
       <LeadMagnet />
 
       {/* Pricing */}
-      <section id="pricing" className="mx-auto max-w-6xl px-4 py-20">
+      <section id="pricing" className="mx-auto max-w-6xl px-4 py-12">
         <SectionHeading
           eyebrow="Pricing"
           title="Start free, scale when ready"
         />
-        <div className="mt-12 grid gap-5 lg:grid-cols-4">
+        <div className="mt-8 grid gap-5 lg:grid-cols-4">
           {PRICING.map((p) => (
             <Surface
               key={p.name}
@@ -399,7 +399,7 @@ export default function LandingPage() {
 
       {/* Contact / CTA */}
       <section id="contact" className="border-t border-border/60 bg-surface/30">
-        <div className="mx-auto grid max-w-6xl items-start gap-10 px-4 py-20 lg:grid-cols-2">
+        <div className="mx-auto grid max-w-6xl items-start gap-10 px-4 py-12 lg:grid-cols-2">
           <div>
             <Badge tone="primary" className="mb-4">
               <Share2 className="h-3 w-3" /> Talk to us
