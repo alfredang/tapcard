@@ -20,7 +20,7 @@ import { HeroCardShowcase } from "@/components/marketing/hero-card-showcase";
 import { LeadMagnet } from "@/components/marketing/lead-magnet";
 import { avatarUrl } from "@/lib/avatar";
 import { THEME_LIST } from "@/lib/themes";
-import { demoCard } from "@/lib/demo-card";
+import { demoCard, demoPersonas } from "@/lib/demo-card";
 
 export const metadata = {
   title: "Digital Business Cards with a Built-in CRM",
@@ -291,12 +291,13 @@ export default function LandingPage() {
           ))}
         </div>
         <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURED_THEMES.map((key) => {
+          {FEATURED_THEMES.map((key, i) => {
             const theme = THEME_LIST.find((t) => t.key === key)!;
+            const person = demoPersonas[i % demoPersonas.length];
             return (
               <div key={theme.key} className="flex flex-col items-center gap-3">
                 <CardView
-                  card={{ ...demoCard, theme: theme.key, accentColor: theme.accent }}
+                  card={{ ...person, theme: theme.key, accentColor: theme.accent }}
                 />
                 <span className="text-sm font-medium text-muted-foreground">
                   {theme.label}

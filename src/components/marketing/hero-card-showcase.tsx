@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { CardView } from "@/components/card/card-view";
 import { THEME_LIST } from "@/lib/themes";
-import { demoCard } from "@/lib/demo-card";
+import { demoPersonas } from "@/lib/demo-card";
 
 // A compact animated stand-in for a static demo card: the card gently pans
 // (like someone scrolling it) while cycling through a handful of themes.
@@ -18,6 +18,7 @@ export function HeroCardShowcase() {
   }, []);
 
   const theme = THEME_LIST.find((t) => t.key === CYCLE[index])!;
+  const person = demoPersonas[index % demoPersonas.length];
 
   return (
     <div className="relative mx-auto w-full max-w-xs">
@@ -25,7 +26,7 @@ export function HeroCardShowcase() {
         <div className="h-[430px] overflow-hidden rounded-[22px] shadow-2xl">
           <div className="hero-pan">
             <CardView
-              card={{ ...demoCard, theme: theme.key, accentColor: theme.accent }}
+              card={{ ...person, theme: theme.key, accentColor: theme.accent }}
             />
           </div>
         </div>

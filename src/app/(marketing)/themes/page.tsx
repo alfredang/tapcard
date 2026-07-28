@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CardView } from "@/components/card/card-view";
 import { THEME_LIST } from "@/lib/themes";
-import { demoCard } from "@/lib/demo-card";
+import { demoPersonas } from "@/lib/demo-card";
 
 export const metadata: Metadata = {
   title: "Card themes — Tapcard",
@@ -33,10 +33,14 @@ export default function ThemesPage() {
       </div>
 
       <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {THEME_LIST.map((theme) => (
+        {THEME_LIST.map((theme, i) => (
           <div key={theme.key} className="flex flex-col items-center gap-3">
             <CardView
-              card={{ ...demoCard, theme: theme.key, accentColor: theme.accent }}
+              card={{
+                ...demoPersonas[i % demoPersonas.length],
+                theme: theme.key,
+                accentColor: theme.accent,
+              }}
             />
             <span className="text-sm font-medium text-muted-foreground">
               {theme.label}
