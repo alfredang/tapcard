@@ -41,7 +41,7 @@ relationship.
 |     | Feature              | Description                                                                                                              |
 | --- | -------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | 🪪  | **Card Builder**     | Canva-style 3-panel editor (content · live preview · design) with instant preview, autosave, 20 themes and accent colors. |
-| 🌐  | **Public cards**     | Blinq-style, mobile-first card pages at `/c/<slug>` — 20 themes, one-detail-per-row layout, full-screen QR, Save Contact, WhatsApp, socials and lead capture.       |
+| 🌐  | **Public cards**     | Blinq-style, mobile-first card pages at `/c/<slug>` — 20 themes, one-detail-per-row layout (company, mobile & landline, maps-linked address), bio, full-screen QR, Save Contact, WhatsApp, socials and lead capture.       |
 | 📱  | **QR codes**         | Open card / save contact / WhatsApp / email / website, with color customization and PNG / SVG export.                    |
 | 📇  | **Save to Contacts** | One-tap vCard (VCF) export compatible with iPhone, Android, Google and Outlook.                                          |
 | 💬  | **WhatsApp**         | Message, request-a-quote and share deep links built in.                                                                  |
