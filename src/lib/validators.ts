@@ -40,7 +40,7 @@ export const cardSchema = z.object({
   jobTitle: optionalStr,
   company: optionalStr,
   department: optionalStr,
-  bio: z.string().trim().max(600).or(z.literal("")).nullish(),
+  bio: z.string().trim().max(1000).or(z.literal("")).nullish(),
   about: z.string().trim().max(2000).or(z.literal("")).nullish(),
   tagline: optionalStr,
 

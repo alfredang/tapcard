@@ -3,6 +3,8 @@
 import type { ComponentType, ReactNode } from "react";
 import {
   Phone,
+  Smartphone,
+  Building2,
   Mail,
   Globe,
   MessageCircle,
@@ -76,8 +78,6 @@ export function CardView({
   const pretty = (url: string) =>
     url.replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/$/, "");
 
-  const phone = card.mobile || card.officePhone;
-
   return (
     <div
       className="mx-auto w-full max-w-sm overflow-hidden"
@@ -139,13 +139,6 @@ export function CardView({
             {card.jobTitle}
           </p>
         )}
-        {(card.company || card.department) && (
-          <p className="break-words text-sm" style={{ color: t.subtext }}>
-            {card.company}
-            {card.company && card.department ? " · " : ""}
-            {card.department}
-          </p>
-        )}
         {card.tagline && (
           <p className="mt-2 break-words text-sm italic" style={{ color: accent }}>
             “{card.tagline}”
@@ -160,15 +153,33 @@ export function CardView({
 
       {/* Contact rows — one detail per line, Blinq-style */}
       <div className="mt-5 flex flex-col gap-1 px-4">
-        {phone && (
+        {(card.company || card.department) && (
+          <Row icon={Building2} theme={t} accent={accent}>
+            {card.company}
+            {card.company && card.department ? " · " : ""}
+            {card.department}
+          </Row>
+        )}
+        {card.mobile && (
           <Row
-            icon={Phone}
-            href={telLink(phone)}
+            icon={Smartphone}
+            href={telLink(card.mobile)}
             onClick={() => onTrack?.("PHONE_CLICK")}
             theme={t}
             accent={accent}
           >
-            {phone}
+            {card.mobile}
+          </Row>
+        )}
+        {card.officePhone && (
+          <Row
+            icon={Phone}
+            href={telLink(card.officePhone)}
+            onClick={() => onTrack?.("PHONE_CLICK")}
+            theme={t}
+            accent={accent}
+          >
+            {card.officePhone}
           </Row>
         )}
         {card.email && (
