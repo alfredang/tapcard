@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Sparkles, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -19,9 +19,8 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/70 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2 font-bold">
-          <span className="gradient-primary flex h-8 w-8 items-center justify-center rounded-lg">
-            <Sparkles className="h-4.5 w-4.5 text-white" />
-          </span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand-icon.png" alt="Tapcard" className="h-8 w-8 rounded-lg" />
           <span className="gradient-text text-lg">Tapcard</span>
         </Link>
 
