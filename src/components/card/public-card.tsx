@@ -20,6 +20,10 @@ export function PublicCard({ card }: { card: CardData }) {
   const [copied, setCopied] = useState(false);
   const [showQr, setShowQr] = useState(false);
   const [qr, setQr] = useState<string>();
+  // Arrived from a "connect on WhatsApp" QR (?wa=1). We hand off to wa.me and
+  // keep the card underneath, so a visitor without WhatsApp still lands on the
+  // full card instead of a dead-end App Store page.
+  const [waHandoff, setWaHandoff] = useState(false);
 
   // Render the QR lazily, the first time the modal opens.
   useEffect(() => {
@@ -35,6 +39,29 @@ export function PublicCard({ card }: { card: CardData }) {
   useEffect(() => {
     track(slug, "VIEW");
     if (search.get("src") === "qr") track(slug, "QR_SCAN");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ?wa=1 — the card's QR is a "message me on WhatsApp" code. Try the app
+  // directly; if WhatsApp isn't installed the redirect simply doesn't take and
+  // the visitor is left on this card, which is the point of routing through it.
+  useEffect(() => {
+    if (search.get("wa") !== "1") return;
+    const target = whatsappLink(
+      card.whatsapp || card.mobile,
+      WHATSAPP_PRESETS.connect(card.fullName, {
+        company: card.company,
+        linkedin: card.linkedin,
+        cardUrl: shareUrl,
+      }),
+    );
+    if (!target) return;
+    setWaHandoff(true);
+    track(slug, "WHATSAPP_CLICK", { src: "qr" });
+    const timer = setTimeout(() => {
+      window.location.href = target;
+    }, 600);
+    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -65,6 +92,18 @@ export function PublicCard({ card }: { card: CardData }) {
       style={{ background: t.pageBg }}
     >
       <div className="w-full max-w-sm space-y-4">
+        {waHandoff && (
+          <div
+            className="rounded-xl px-4 py-3 text-center text-sm"
+            style={{ background: t.chipBg, color: t.text, border: `1px solid ${t.cardBorder}` }}
+          >
+            <p className="font-medium">Opening WhatsApp…</p>
+            <p className="mt-1 text-xs opacity-70">
+              Nothing happened? WhatsApp may not be installed — save the contact below instead.
+            </p>
+          </div>
+        )}
+
         <CardView card={card} vcfHref={appUrl(`/api/c/${slug}/vcf`)} onTrack={onTrack} />
 
         {/* Lead capture */}

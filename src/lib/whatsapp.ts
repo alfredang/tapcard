@@ -12,9 +12,31 @@ export function whatsappLink(phone?: string | null, message?: string) {
   return message ? `${base}?text=${encodeURIComponent(message)}` : base;
 }
 
+/// Normalise a LinkedIn field into a full profile URL — people type a bare
+/// handle, "linkedin.com/in/…", or the complete link.
+export function linkedinUrl(raw?: string | null) {
+  const value = (raw || "").trim();
+  if (!value) return "";
+  if (/^https?:\/\//i.test(value)) return value;
+  if (value.toLowerCase().includes("linkedin.com")) return `https://${value}`;
+  const handle = value.replace(/^in\//, "");
+  return `https://www.linkedin.com/in/${handle}`;
+}
+
 export const WHATSAPP_PRESETS = {
   message: (name?: string) =>
     `Hi${name ? ` ${name}` : ""}, I came across your digital business card and would love to connect.`,
+  /// The intro a QR scanner sends: who they met, plus the links worth keeping,
+  /// so the chat itself carries the contact details.
+  connect: (name?: string, opts?: { company?: string | null; linkedin?: string | null; cardUrl?: string }) => {
+    let text = `Hi${name ? ` ${name}` : ""}, I scanned your Tapcard`;
+    if (opts?.company) text += ` at ${opts.company}`;
+    text += " — I'd like to connect.";
+    const li = linkedinUrl(opts?.linkedin);
+    if (li) text += `\n\nLinkedIn: ${li}`;
+    if (opts?.cardUrl) text += `\nCard: ${opts.cardUrl}`;
+    return text;
+  },
   share: (url: string, name?: string) =>
     `Check out ${name ? `${name}'s` : "this"} digital business card: ${url}`,
 };
