@@ -11,6 +11,7 @@ import {
   UserPlus,
   MapPin,
 } from "lucide-react";
+import { CardDesignBanner } from "./card-design-banner";
 import { getTheme } from "@/lib/themes";
 import { activeSocials, type CardData, type SocialKey } from "@/lib/card";
 import { whatsappLink, telLink, mailtoLink, WHATSAPP_PRESETS } from "@/lib/whatsapp";
@@ -81,6 +82,7 @@ export function CardView({
   return (
     <div
       className="mx-auto w-full max-w-sm overflow-hidden"
+      data-card-design={t.key}
       style={{
         background: t.cardBg,
         color: t.text,
@@ -92,8 +94,9 @@ export function CardView({
         transformOrigin: "top center",
       }}
     >
-      {/* Banner */}
+      {/* Illustrated design header */}
       <div className="relative h-36 w-full" style={{ background: t.bannerGradient }}>
+        <CardDesignBanner theme={t.key} />
         {card.coverBanner && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -114,9 +117,9 @@ export function CardView({
 
       {/* Identity — `relative` so the avatar paints ABOVE the (positioned)
           banner; without it the banner covers the avatar's top half. */}
-      <div className="relative z-10 -mt-12 px-6">
+      <div className="relative z-10 -mt-16 px-6 text-center">
         <div
-          className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full text-2xl font-bold text-white shadow-lg"
+          className="mx-auto flex h-32 w-32 items-center justify-center overflow-hidden rounded-full text-4xl font-bold text-white shadow-lg"
           style={{ background: accent, boxShadow: `0 0 0 4px ${t.cardBg}` }}
         >
           {card.profilePhoto ? (

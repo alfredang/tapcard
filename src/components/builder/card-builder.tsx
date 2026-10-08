@@ -1,4 +1,5 @@
 "use client";
+import { CardDesignBanner, DESIGN_NAMES } from "@/components/card/card-design-banner";
 
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -369,7 +370,7 @@ export function CardBuilder({
         {/* Right — design + publish + share */}
         <div className="order-3 space-y-4">
           <Surface className="p-4">
-            <h3 className="mb-3 text-sm font-semibold">Theme</h3>
+            <h3 className="mb-3 text-sm font-semibold">Design templates</h3>
             <div className="grid grid-cols-3 gap-2">
               {THEME_LIST.map((t) => (
                 <button
@@ -382,11 +383,11 @@ export function CardBuilder({
                   }`}
                 >
                   <span
-                    className="mb-1 block h-8 w-full rounded"
+                    className="relative mb-1 block h-16 w-full overflow-hidden rounded"
                     style={{ background: t.bannerGradient }}
-                  />
+                  ><CardDesignBanner theme={t.key} /></span>
                   <span className="text-[11px] text-muted-foreground">
-                    {t.label}
+                    {DESIGN_NAMES[t.key]}
                   </span>
                 </button>
               ))}
