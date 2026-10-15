@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toast";
@@ -49,6 +49,18 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: { index: true, follow: true, "max-image-preview": "large" },
   },
+};
+
+// viewport-fit=cover lets the app shell pad for the notch / home indicator
+// (env(safe-area-inset-*)) instead of leaving dead bands on phones.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#fcfaff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0c0916" },
+  ],
 };
 
 // Apply the saved theme before paint to avoid a flash. Light is the default.

@@ -42,12 +42,15 @@ relationship.
 | --- | -------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | 🪪  | **Card Builder**     | Canva-style 3-panel editor (content · live preview · design) with instant preview, autosave, 20 themes and accent colors. |
 | 🌐  | **Public cards**     | Blinq-style, mobile-first card pages at `/c/<slug>` — 20 themes, one-detail-per-row layout (company, mobile & landline, maps-linked address), bio, full-screen QR, Save Contact, WhatsApp, socials and lead capture.       |
-| 📱  | **QR codes**         | Open card / save contact / WhatsApp / email / website, with color customization and PNG / SVG export.                    |
+| 📱  | **QR codes**         | Scan-to-WhatsApp (opens a chat with you, card underneath), LinkedIn, or open card — default set in Settings; plus save contact / email / website, color customization and PNG / SVG export. |
 | 📇  | **Save to Contacts** | One-tap vCard (VCF) export compatible with iPhone, Android, Google and Outlook.                                          |
-| 💬  | **WhatsApp**         | Message, request-a-quote and share deep links built in.                                                                  |
+| 💬  | **WhatsApp**         | Message, request-a-quote and share deep links. Local numbers get the account's country code (`9698 3731` → `wa.me/6596983731`), so links never hit WhatsApp's "invalid number" error. |
+| ⚙️  | **Synced settings**  | Country code, default QR and card design are edited in the mobile apps (or `/settings`) and sync both ways via `/api/mobile/settings`. |
 | 🎯  | **Lead capture**     | Visitors leave their details straight from your card — leads flow into the CRM.                                          |
 | 📊  | **CRM**              | Contacts (CRUD, search, CSV export), leads inbox, and a drag-and-drop Kanban sales pipeline (7 stages).                  |
+| 📲  | **Mobile-first**     | The iOS and Android apps are the primary experience; on phones the web app uses the same bottom tabs (Home · Cards · Contacts · Planner · Settings) and Safari offers the App Store app. |
 | 🍎  | **iOS app**          | Tertiary Tapcard on the App Store — scan paper cards (single-shot, Apple Intelligence parsing), Apple/Google sign-in, QR sharing.                                                         |
+| 🤖  | **Android app**      | Native Jetpack Compose companion ([tapcardapp_android](https://github.com/alfredang/tapcardapp_android)) — same synced settings, QR modes and 20 designs. |
 | 🤖  | **AI**               | Bio / about generation and lead scoring via the **Claude Agent SDK** (subscription — no API key).                        |
 | 📈  | **Analytics**        | Card views, QR scans, downloads and click tracking with an engagement dashboard.                                         |
 | 🔐  | **Auth**             | Email + password, one-time email codes, and Google SSO. (Microsoft / LinkedIn SSO auto-enable when configured.) |

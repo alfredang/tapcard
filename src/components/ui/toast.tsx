@@ -44,7 +44,7 @@ export function Toaster() {
   }, []);
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[100] flex flex-col items-center gap-2 p-4 sm:items-end">
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[100] flex flex-col items-center gap-2 p-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:items-end lg:pb-4">
       <AnimatePresence>
         {items.map((t) => {
           const Icon = ICON[t.type];
