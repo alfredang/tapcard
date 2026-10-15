@@ -1,4 +1,5 @@
 import type { Card } from "@prisma/client";
+import { internationalPhone } from "@/lib/whatsapp";
 
 /** Escape a value for vCard 3.0 (commas, semicolons, newlines). */
 function esc(value?: string | null) {
@@ -14,7 +15,10 @@ function esc(value?: string | null) {
  * Build a vCard 3.0 string from a Card. 3.0 is the most broadly compatible
  * format across iPhone, Android, Google and Outlook contacts.
  */
-export function cardToVCard(card: Card): string {
+export function cardToVCard(card: Card, countryCode?: string | null): string {
+  // International "+65…" numbers so the saved contact dials (and shows up in
+  // WhatsApp) from any country.
+  const tel = (v?: string | null) => internationalPhone(v, countryCode) || v || "";
   const nameParts = card.fullName.trim().split(/\s+/);
   const last = nameParts.length > 1 ? nameParts.pop()! : "";
   const first = nameParts.join(" ");
@@ -25,9 +29,9 @@ export function cardToVCard(card: Card): string {
   lines.push(`FN:${esc(card.fullName)}`);
   if (card.company) lines.push(`ORG:${esc(card.company)}`);
   if (card.jobTitle) lines.push(`TITLE:${esc(card.jobTitle)}`);
-  if (card.mobile) lines.push(`TEL;TYPE=CELL:${esc(card.mobile)}`);
-  if (card.officePhone) lines.push(`TEL;TYPE=WORK:${esc(card.officePhone)}`);
-  if (card.whatsapp) lines.push(`TEL;TYPE=WHATSAPP:${esc(card.whatsapp)}`);
+  if (card.mobile) lines.push(`TEL;TYPE=CELL:${esc(tel(card.mobile))}`);
+  if (card.officePhone) lines.push(`TEL;TYPE=WORK:${esc(tel(card.officePhone))}`);
+  if (card.whatsapp) lines.push(`TEL;TYPE=WHATSAPP:${esc(tel(card.whatsapp))}`);
   if (card.email) lines.push(`EMAIL;TYPE=INTERNET:${esc(card.email)}`);
   if (card.website) lines.push(`URL:${esc(card.website)}`);
   if (card.address) lines.push(`ADR;TYPE=WORK:;;${esc(card.address)};;;;`);

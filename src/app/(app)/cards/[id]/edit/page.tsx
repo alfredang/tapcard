@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import { CardBuilder } from "@/components/builder/card-builder";
+import { getUserPrefs } from "@/lib/user-prefs";
 
 export const metadata = { title: "Edit Card — Tapcard" };
 
@@ -19,5 +20,6 @@ export default async function EditCardPage({
   const { gallery: _gallery, createdAt: _c, updatedAt: _u, userId: _uid, ...rest } =
     card;
 
-  return <CardBuilder cardId={card.id} initialCard={rest} />;
+  const prefs = await getUserPrefs(user.id);
+  return <CardBuilder cardId={card.id} initialCard={rest} prefs={prefs} />;
 }

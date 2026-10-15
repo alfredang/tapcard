@@ -34,6 +34,10 @@ export interface CardData {
 
   theme?: string | null;
   accentColor?: string | null;
+
+  /// The owner's default dialling code (User.countryCode) — turns local
+  /// numbers into wa.me / tel: links that work. Not a Card column.
+  countryCode?: string | null;
 }
 
 export type SocialKey =

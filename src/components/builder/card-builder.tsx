@@ -23,6 +23,7 @@ import { toast } from "@/components/ui/toast";
 import { THEME_LIST } from "@/lib/themes";
 import { cardCompleteness, type CardData } from "@/lib/card";
 import { appUrl } from "@/lib/utils";
+import type { UserPrefs } from "@/lib/user-prefs";
 
 type BuilderState = CardData & { published?: boolean };
 
@@ -124,9 +125,13 @@ function ImageField({
 export function CardBuilder({
   initialCard,
   cardId: initialId,
+  prefs,
 }: {
   initialCard?: BuilderState;
   cardId?: string;
+  /// The account's synced preferences (country code for phone links, default
+  /// QR mode) — shared with the iOS app's Settings.
+  prefs?: UserPrefs;
 }) {
   const router = useRouter();
   const [state, setState] = useState<BuilderState>(initialCard ?? EMPTY);
@@ -363,7 +368,7 @@ export function CardBuilder({
                 {completeness}% complete
               </span>
             </div>
-            <CardView card={state} />
+            <CardView card={{ ...state, countryCode: prefs?.countryCode }} />
           </div>
         </div>
 
@@ -446,7 +451,10 @@ export function CardBuilder({
           {slug ? (
             <Surface className="p-4">
               <h3 className="mb-3 text-sm font-semibold">Share & QR</h3>
-              <SharePanel card={{ ...state, slug }} />
+              <SharePanel
+                card={{ ...state, slug, countryCode: prefs?.countryCode }}
+                qrMode={prefs?.qrMode}
+              />
             </Surface>
           ) : (
             <Surface className="p-4 text-sm text-muted-foreground">

@@ -113,6 +113,12 @@ model User {
   // lets the server insert appointments into the user's own Google Calendar.
   googleCalRefresh String?
   googleCalEmail   String?
+  // Preferences edited from the iOS app's Settings and the web /settings page
+  // (synced both ways). countryCode is the default dialling code applied to
+  // local numbers ("96983731" → wa.me/6596983731); qrMode picks what the
+  // card's QR opens by default: WHATSAPP | LINKEDIN | CARD.
+  countryCode   String    @default("65")
+  qrMode        String    @default("WHATSAPP")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

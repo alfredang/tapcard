@@ -7,7 +7,7 @@ import { CardView } from "@/components/card/card-view";
 import { getTheme } from "@/lib/themes";
 import { qrDataUrl } from "@/lib/qr";
 import { appUrl } from "@/lib/utils";
-import { WHATSAPP_PRESETS, whatsappLink } from "@/lib/whatsapp";
+import { WHATSAPP_PRESETS, whatsappLink, whatsappNumber } from "@/lib/whatsapp";
 import { toast } from "@/components/ui/toast";
 import type { CardData } from "@/lib/card";
 
@@ -48,12 +48,13 @@ export function PublicCard({ card }: { card: CardData }) {
   useEffect(() => {
     if (search.get("wa") !== "1") return;
     const target = whatsappLink(
-      card.whatsapp || card.mobile,
+      whatsappNumber(card),
       WHATSAPP_PRESETS.connect(card.fullName, {
         company: card.company,
         linkedin: card.linkedin,
         cardUrl: shareUrl,
       }),
+      card.countryCode,
     );
     if (!target) return;
     setWaHandoff(true);
@@ -69,7 +70,11 @@ export function PublicCard({ card }: { card: CardData }) {
     track(slug, type, meta);
 
   const shareUrl = appUrl(`/c/${slug}`);
-  const waShare = whatsappLink(card.whatsapp, "") || "";
+  // Forward this card to someone else: wa.me with no number opens WhatsApp's
+  // chat picker. (Addressing it to the owner's own number made no sense.)
+  const waShare = `https://wa.me/?text=${encodeURIComponent(
+    WHATSAPP_PRESETS.share(shareUrl, card.fullName),
+  )}`;
 
   async function share() {
     if (navigator.share) {
@@ -145,7 +150,7 @@ export function PublicCard({ card }: { card: CardData }) {
           </button>
           {waShare && (
             <a
-              href={whatsappLink(card.whatsapp, WHATSAPP_PRESETS.share(shareUrl, card.fullName))}
+              href={waShare}
               target="_blank"
               rel="noreferrer"
               className="flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium"

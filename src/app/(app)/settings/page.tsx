@@ -1,14 +1,18 @@
-import { Palette, Globe, Shield, User } from "lucide-react";
+import Link from "next/link";
+import { Palette, Globe, Shield, User, SlidersHorizontal } from "lucide-react";
 import { requireUser } from "@/lib/session";
 import { Card, Badge } from "@/components/ui/card";
 import { PageHeader } from "@/components/app/page-header";
 import { SignOutButton } from "@/components/app/sign-out-button";
 import { initials } from "@/lib/utils";
+import { PreferencesForm } from "@/components/app/preferences-form";
+import { getUserPrefs } from "@/lib/user-prefs";
 
 export const metadata = { title: "Settings — Tapcard" };
 
 export default async function SettingsPage() {
   const user = await requireUser();
+  const prefs = await getUserPrefs(user.id!);
 
   return (
     <div>
@@ -32,6 +36,28 @@ export default async function SettingsPage() {
             </div>
             <SignOutButton />
           </div>
+        </Card>
+
+        <Card className="p-6">
+          <div className="mb-4 flex items-center gap-2">
+            <SlidersHorizontal className="h-4 w-4 text-primary" />
+            <h2 className="font-semibold">Sharing preferences</h2>
+          </div>
+          <PreferencesForm initial={prefs} />
+        </Card>
+
+        <Card className="p-6">
+          <div className="mb-2 flex items-center gap-2">
+            <Palette className="h-4 w-4 text-primary" />
+            <h2 className="font-semibold">Card design</h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Pick from 20 designs and an accent colour in the card editor here, or
+            in the app under Settings → Card design. Both edit the same card.
+          </p>
+          <Link href="/cards" className="mt-3 inline-block text-sm font-medium text-primary hover:underline">
+            Open my cards →
+          </Link>
         </Card>
 
         <Card className="p-6">

@@ -24,11 +24,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PublicCardPage({ params }: Props) {
   const { slug } = await params;
-  const card = await prisma.card.findUnique({ where: { slug } });
+  const card = await prisma.card.findUnique({
+    where: { slug },
+    include: { user: { select: { countryCode: true } } },
+  });
   if (!card || !card.published) notFound();
 
-  // Card is a structural superset of CardData; assignment (not a literal) is fine.
-  const data: CardData = card;
+  // Card is a structural superset of CardData; the owner's country code rides
+  // along so local numbers become working WhatsApp / tel: links.
+  const { user, ...rest } = card;
+  const data: CardData = { ...rest, countryCode: user.countryCode };
 
   return (
     <Suspense>

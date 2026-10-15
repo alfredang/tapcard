@@ -166,7 +166,7 @@ export function CardView({
         {card.mobile && (
           <Row
             icon={Smartphone}
-            href={telLink(card.mobile)}
+            href={telLink(card.mobile, card.countryCode)}
             onClick={() => onTrack?.("PHONE_CLICK")}
             theme={t}
             accent={accent}
@@ -177,7 +177,7 @@ export function CardView({
         {card.officePhone && (
           <Row
             icon={Phone}
-            href={telLink(card.officePhone)}
+            href={telLink(card.officePhone, card.countryCode)}
             onClick={() => onTrack?.("PHONE_CLICK")}
             theme={t}
             accent={accent}
@@ -199,7 +199,7 @@ export function CardView({
         {card.whatsapp && (
           <Row
             icon={MessageCircle}
-            href={whatsappLink(card.whatsapp, WHATSAPP_PRESETS.message(card.fullName))}
+            href={whatsappLink(card.whatsapp, WHATSAPP_PRESETS.message(card.fullName), card.countryCode)}
             external
             onClick={() => onTrack?.("WHATSAPP_CLICK")}
             theme={t}

@@ -5,23 +5,31 @@ import { Copy, Check, Download, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { qrDataUrl, qrSvg } from "@/lib/qr";
 import { appUrl } from "@/lib/utils";
-import { whatsappLink, mailtoLink, WHATSAPP_PRESETS } from "@/lib/whatsapp";
+import { whatsappNumber, linkedinUrl, mailtoLink } from "@/lib/whatsapp";
 import type { CardData } from "@/lib/card";
 
-type QrMode = "card" | "save" | "whatsapp" | "email" | "website";
+type QrMode = "card" | "save" | "whatsapp" | "linkedin" | "email" | "website";
 
 const MODES: { key: QrMode; label: string }[] = [
   { key: "card", label: "Open Card" },
   { key: "save", label: "Save Contact" },
   { key: "whatsapp", label: "WhatsApp" },
+  { key: "linkedin", label: "LinkedIn" },
   { key: "email", label: "Email" },
   { key: "website", label: "Website" },
 ];
 
-export function SharePanel({ card }: { card: CardData }) {
+/// The account's synced default (User.qrMode, set in the app or /settings).
+const INITIAL_MODE: Record<string, QrMode> = {
+  WHATSAPP: "whatsapp",
+  LINKEDIN: "linkedin",
+  CARD: "card",
+};
+
+export function SharePanel({ card, qrMode }: { card: CardData; qrMode?: string }) {
   const slug = card.slug!;
   const publicUrl = appUrl(`/c/${slug}`);
-  const [mode, setMode] = useState<QrMode>("card");
+  const [mode, setMode] = useState<QrMode>(INITIAL_MODE[qrMode ?? ""] ?? "card");
   const [dark, setDark] = useState("#0b1020");
   const [light, setLight] = useState("#ffffff");
   const [png, setPng] = useState<string>("");
@@ -32,10 +40,12 @@ export function SharePanel({ card }: { card: CardData }) {
       case "save":
         return appUrl(`/api/c/${slug}/vcf`);
       case "whatsapp":
-        return (
-          whatsappLink(card.whatsapp, WHATSAPP_PRESETS.message(card.fullName)) ||
-          publicUrl
-        );
+        // Same hand-off the app's QR uses: the card page with ?wa=1 opens a
+        // WhatsApp chat to the owner, and falls back to the card itself when
+        // the scanner has no WhatsApp.
+        return whatsappNumber(card) ? `${publicUrl}?wa=1&src=qr` : publicUrl;
+      case "linkedin":
+        return linkedinUrl(card.linkedin) || publicUrl;
       case "email":
         return mailtoLink(card.email) || publicUrl;
       case "website":

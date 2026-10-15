@@ -8,7 +8,10 @@ type Ctx = { params: Promise<{ slug: string }> };
 // the download as an analytics event.
 export async function GET(req: Request, { params }: Ctx) {
   const { slug } = await params;
-  const card = await prisma.card.findUnique({ where: { slug } });
+  const card = await prisma.card.findUnique({
+    where: { slug },
+    include: { user: { select: { countryCode: true } } },
+  });
   if (!card || !card.published) {
     return new Response("Not found", { status: 404 });
   }
@@ -21,7 +24,7 @@ export async function GET(req: Request, { params }: Ctx) {
       .catch(() => {});
   }
 
-  const vcard = cardToVCard(card);
+  const vcard = cardToVCard(card, card.user.countryCode);
   return new Response(vcard, {
     headers: {
       "Content-Type": "text/vcard; charset=utf-8",
