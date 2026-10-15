@@ -43,23 +43,36 @@ export function internationalDigits(
   if (!digits) return "";
   if (raw.startsWith("+")) return digits;
   if (digits.startsWith("00")) return digits.slice(2);
-  const cc = (countryCode || DEFAULT_COUNTRY_CODE).replace(/\D/g, "") || DEFAULT_COUNTRY_CODE;
+  const cc =
+    (countryCode || DEFAULT_COUNTRY_CODE).replace(/\D/g, "") ||
+    DEFAULT_COUNTRY_CODE;
   if (digits.startsWith("0")) return cc + digits.replace(/^0+/, "");
   const [min, max] = NATIONAL_LENGTHS[cc] ?? [7, 12];
   const fits = (n: number) => n >= min && n <= max;
-  if (digits.startsWith(cc) && fits(digits.length - cc.length) && !fits(digits.length)) {
+  if (
+    digits.startsWith(cc) &&
+    fits(digits.length - cc.length) &&
+    !fits(digits.length)
+  ) {
     return digits;
   }
   return cc + digits;
 }
 
 /// "+6596983731" — for tel: links and vCards, so a contact saved abroad dials.
-export function internationalPhone(input?: string | null, countryCode?: string | null) {
+export function internationalPhone(
+  input?: string | null,
+  countryCode?: string | null,
+) {
   const digits = internationalDigits(input, countryCode);
   return digits ? `+${digits}` : "";
 }
 
-export function whatsappLink(phone?: string | null, message?: string, countryCode?: string | null) {
+export function whatsappLink(
+  phone?: string | null,
+  message?: string,
+  countryCode?: string | null,
+) {
   const num = internationalDigits(phone, countryCode);
   if (!num) return "";
   const base = `https://wa.me/${num}`;
@@ -92,7 +105,14 @@ export const WHATSAPP_PRESETS = {
     `Hi${name ? ` ${name}` : ""}, I came across your digital business card and would love to connect.`,
   /// The intro a QR scanner sends: who they met, plus the links worth keeping,
   /// so the chat itself carries the contact details.
-  connect: (name?: string, opts?: { company?: string | null; linkedin?: string | null; cardUrl?: string }) => {
+  connect: (
+    name?: string,
+    opts?: {
+      company?: string | null;
+      linkedin?: string | null;
+      cardUrl?: string;
+    },
+  ) => {
     let text = `Hi${name ? ` ${name}` : ""}, I scanned your Tapcard`;
     if (opts?.company) text += ` at ${opts.company}`;
     text += " — I'd like to connect.";

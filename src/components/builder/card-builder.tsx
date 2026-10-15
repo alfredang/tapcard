@@ -1,7 +1,16 @@
 "use client";
-import { CardDesignBanner, DESIGN_NAMES } from "@/components/card/card-design-banner";
+import {
+  CardDesignBanner,
+  DESIGN_NAMES,
+} from "@/components/card/card-design-banner";
 
-import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+} from "react";
 import { useRouter } from "next/navigation";
 import {
   Check,
@@ -20,8 +29,8 @@ import { SharePanel } from "@/components/card/share-panel";
 import { PageHeader } from "@/components/app/page-header";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { toast } from "@/components/ui/toast";
-import { THEME_LIST } from "@/lib/themes";
-import { cardCompleteness, type CardData } from "@/lib/card";
+import { THEME_LIST, getTheme } from "@/lib/themes";
+import { cardCompleteness, resolveAccent, type CardData } from "@/lib/card";
 import { appUrl } from "@/lib/utils";
 import type { UserPrefs } from "@/lib/user-prefs";
 
@@ -30,7 +39,7 @@ type BuilderState = CardData & { published?: boolean };
 const EMPTY: BuilderState = {
   fullName: "",
   theme: "MODERN",
-  accentColor: "#7c5cff",
+  accentColor: "",
   published: false,
 };
 
@@ -41,10 +50,15 @@ type SaveStatus = "idle" | "saving" | "saved" | "error";
  * compact JPEG data URL — so an uploaded laptop photo is stored inline without
  * bloating the database (mirrors the app's approach).
  */
-async function fileToScaledDataUrl(file: File, maxDim = 720, quality = 0.8): Promise<string> {
+async function fileToScaledDataUrl(
+  file: File,
+  maxDim = 720,
+  quality = 0.8,
+): Promise<string> {
   const dataUrl = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : "");
+    reader.onload = () =>
+      resolve(typeof reader.result === "string" ? reader.result : "");
     reader.onerror = () => reject(reader.error);
     reader.readAsDataURL(file);
   });
@@ -97,13 +111,28 @@ function ImageField({
 
   return (
     <div className="space-y-2">
-      <TextField label={label} value={value} onChange={onChange} placeholder={placeholder} />
+      <TextField
+        label={label}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+      />
       <div className="flex items-center gap-3">
         {value ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={value} alt="" className="h-12 w-12 rounded-md border border-white/10 object-cover" />
+          <img
+            src={value}
+            alt=""
+            className="h-12 w-12 rounded-md border border-white/10 object-cover"
+          />
         ) : null}
-        <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={onFile} />
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={onFile}
+        />
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
@@ -113,7 +142,11 @@ function ImageField({
           {busy ? "Processing…" : "Upload file"}
         </button>
         {value ? (
-          <button type="button" onClick={() => onChange("")} className="text-sm text-danger hover:underline">
+          <button
+            type="button"
+            onClick={() => onChange("")}
+            className="text-danger text-sm hover:underline"
+          >
             Remove
           </button>
         ) : null}
@@ -136,7 +169,9 @@ export function CardBuilder({
   const router = useRouter();
   const [state, setState] = useState<BuilderState>(initialCard ?? EMPTY);
   const [cardId, setCardId] = useState<string | undefined>(initialId);
-  const [slug, setSlug] = useState<string | undefined>(initialCard?.slug ?? undefined);
+  const [slug, setSlug] = useState<string | undefined>(
+    initialCard?.slug ?? undefined,
+  );
   const [status, setStatus] = useState<SaveStatus>("idle");
   const [confirmDel, setConfirmDel] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -198,7 +233,9 @@ export function CardBuilder({
     const next = { ...state, published: !state.published };
     setState(next);
     await persist(next);
-    toast.success(next.published ? "Card published — it's now live" : "Card unpublished");
+    toast.success(
+      next.published ? "Card published — it's now live" : "Card unpublished",
+    );
   }
 
   function remove() {
@@ -227,9 +264,12 @@ export function CardBuilder({
 
   return (
     <div>
-      <PageHeader title="Card Builder" description="Changes preview instantly and save automatically.">
+      <PageHeader
+        title="Card Builder"
+        description="Changes preview instantly and save automatically."
+      >
         {needsName ? (
-          <span className="flex items-center gap-1.5 rounded-full bg-warning/15 px-3 py-1 text-xs font-medium text-warning">
+          <span className="bg-warning/15 text-warning flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium">
             Add a full name to save
           </span>
         ) : (
@@ -242,7 +282,13 @@ export function CardBuilder({
             </a>
           </Button>
         )}
-        <Button variant="ghost" size="sm" onClick={remove} aria-label="Delete card" className="text-muted-foreground hover:bg-danger/10 hover:text-danger">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={remove}
+          aria-label="Delete card"
+          className="text-muted-foreground hover:bg-danger/10 hover:text-danger"
+        >
           <Trash2 className="h-4 w-4" />
         </Button>
       </PageHeader>
@@ -319,7 +365,11 @@ export function CardBuilder({
           </Section>
 
           <Section title="Contact Details" step={3}>
-            <TextField label="Mobile" value={state.mobile ?? ""} onChange={set("mobile")} />
+            <TextField
+              label="Mobile"
+              value={state.mobile ?? ""}
+              onChange={set("mobile")}
+            />
             <TextField
               label="Office phone"
               value={state.officePhone ?? ""}
@@ -343,17 +393,49 @@ export function CardBuilder({
               onChange={set("website")}
               placeholder="https://…"
             />
-            <TextField label="Address" value={state.address ?? ""} onChange={set("address")} />
+            <TextField
+              label="Address"
+              value={state.address ?? ""}
+              onChange={set("address")}
+            />
           </Section>
 
           <Section title="Social Links" step={4}>
-            <TextField label="LinkedIn" value={state.linkedin ?? ""} onChange={set("linkedin")} />
-            <TextField label="X (Twitter)" value={state.twitter ?? ""} onChange={set("twitter")} />
-            <TextField label="Instagram" value={state.instagram ?? ""} onChange={set("instagram")} />
-            <TextField label="Facebook" value={state.facebook ?? ""} onChange={set("facebook")} />
-            <TextField label="YouTube" value={state.youtube ?? ""} onChange={set("youtube")} />
-            <TextField label="TikTok" value={state.tiktok ?? ""} onChange={set("tiktok")} />
-            <TextField label="Telegram" value={state.telegram ?? ""} onChange={set("telegram")} />
+            <TextField
+              label="LinkedIn"
+              value={state.linkedin ?? ""}
+              onChange={set("linkedin")}
+            />
+            <TextField
+              label="X (Twitter)"
+              value={state.twitter ?? ""}
+              onChange={set("twitter")}
+            />
+            <TextField
+              label="Instagram"
+              value={state.instagram ?? ""}
+              onChange={set("instagram")}
+            />
+            <TextField
+              label="Facebook"
+              value={state.facebook ?? ""}
+              onChange={set("facebook")}
+            />
+            <TextField
+              label="YouTube"
+              value={state.youtube ?? ""}
+              onChange={set("youtube")}
+            />
+            <TextField
+              label="TikTok"
+              value={state.tiktok ?? ""}
+              onChange={set("tiktok")}
+            />
+            <TextField
+              label="Telegram"
+              value={state.telegram ?? ""}
+              onChange={set("telegram")}
+            />
           </Section>
         </div>
 
@@ -364,7 +446,7 @@ export function CardBuilder({
               <Badge tone="primary">
                 <Eye className="h-3 w-3" /> Live preview
               </Badge>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-muted-foreground text-xs">
                 {completeness}% complete
               </span>
             </div>
@@ -383,15 +465,17 @@ export function CardBuilder({
                   onClick={() => set("theme")(t.key)}
                   className={`rounded-lg border p-1 text-center transition ${
                     state.theme === t.key
-                      ? "border-primary ring-2 ring-primary/40"
+                      ? "border-primary ring-primary/40 ring-2"
                       : "border-border hover:border-primary/40"
                   }`}
                 >
                   <span
                     className="relative mb-1 block h-16 w-full overflow-hidden rounded"
                     style={{ background: t.bannerGradient }}
-                  ><CardDesignBanner theme={t.key} /></span>
-                  <span className="text-[11px] text-muted-foreground">
+                  >
+                    <CardDesignBanner theme={t.key} />
+                  </span>
+                  <span className="text-muted-foreground text-[11px]">
                     {DESIGN_NAMES[t.key]}
                   </span>
                 </button>
@@ -401,12 +485,27 @@ export function CardBuilder({
             <div className="mt-4">
               <label className="flex items-center justify-between text-sm">
                 <span className="font-medium">Accent color</span>
-                <input
-                  type="color"
-                  value={state.accentColor || "#7c5cff"}
-                  onChange={(e) => set("accentColor")(e.target.value)}
-                  className="h-8 w-12 cursor-pointer rounded border border-border bg-transparent"
-                />
+                <span className="flex items-center gap-2">
+                  {state.accentColor &&
+                    resolveAccent(state.accentColor, "") && (
+                      <button
+                        type="button"
+                        onClick={() => set("accentColor")("")}
+                        className="text-muted-foreground hover:text-foreground text-xs"
+                      >
+                        Match design
+                      </button>
+                    )}
+                  <input
+                    type="color"
+                    value={resolveAccent(
+                      state.accentColor,
+                      getTheme(state.theme).accent,
+                    )}
+                    onChange={(e) => set("accentColor")(e.target.value)}
+                    className="border-border h-8 w-12 cursor-pointer rounded border bg-transparent"
+                  />
+                </span>
               </label>
             </div>
           </Surface>
@@ -415,7 +514,7 @@ export function CardBuilder({
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-semibold">Publish</h3>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   {state.published ? "Card is live" : "Card is a draft"}
                 </p>
               </div>
@@ -440,7 +539,7 @@ export function CardBuilder({
                 href={appUrl(`/c/${slug}`)}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-3 flex items-center gap-1.5 text-xs text-primary hover:underline"
+                className="text-primary mt-3 flex items-center gap-1.5 text-xs hover:underline"
               >
                 <Globe2 className="h-3.5 w-3.5" /> {appUrl(`/c/${slug}`)}
                 <ExternalLink className="h-3 w-3" />
@@ -457,7 +556,7 @@ export function CardBuilder({
               />
             </Surface>
           ) : (
-            <Surface className="p-4 text-sm text-muted-foreground">
+            <Surface className="text-muted-foreground p-4 text-sm">
               Add your name to create the card — your QR code and share link
               appear here.
             </Surface>
@@ -479,17 +578,17 @@ export function CardBuilder({
 function SaveBadge({ status }: { status: SaveStatus }) {
   if (status === "saving")
     return (
-      <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+      <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
         <Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving…
       </span>
     );
   if (status === "saved")
     return (
-      <span className="flex items-center gap-1.5 text-xs text-success">
+      <span className="text-success flex items-center gap-1.5 text-xs">
         <Check className="h-3.5 w-3.5" /> Saved
       </span>
     );
   if (status === "error")
-    return <span className="text-xs text-danger">Save failed</span>;
+    return <span className="text-danger text-xs">Save failed</span>;
   return null;
 }

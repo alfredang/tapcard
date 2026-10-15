@@ -9,12 +9,12 @@ import { qrDataUrl } from "@/lib/qr";
 import { appUrl } from "@/lib/utils";
 import { WHATSAPP_PRESETS, whatsappLink, whatsappNumber } from "@/lib/whatsapp";
 import { toast } from "@/components/ui/toast";
-import type { CardData } from "@/lib/card";
+import { resolveAccent, type CardData } from "@/lib/card";
 
 export function PublicCard({ card }: { card: CardData }) {
   const slug = card.slug!;
   const t = getTheme(card.theme);
-  const accent = card.accentColor || t.accent;
+  const accent = resolveAccent(card.accentColor, t.accent);
   const search = useSearchParams();
   const [showLead, setShowLead] = useState(false);
   const [copied, setCopied] = useState(false);

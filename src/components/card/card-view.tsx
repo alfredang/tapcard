@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { CardDesignBanner } from "./card-design-banner";
 import { getTheme } from "@/lib/themes";
-import { activeSocials, type CardData, type SocialKey } from "@/lib/card";
+import { activeSocials, resolveAccent, type CardData, type SocialKey } from "@/lib/card";
 import { whatsappLink, telLink, mailtoLink, WHATSAPP_PRESETS } from "@/lib/whatsapp";
 import { initials } from "@/lib/utils";
 import {
@@ -69,7 +69,7 @@ export function CardView({
   scale?: number;
 }) {
   const t = getTheme(card.theme);
-  const accent = card.accentColor || t.accent;
+  const accent = resolveAccent(card.accentColor, t.accent);
   const socials = activeSocials(card);
 
   const ext = (href: string) =>

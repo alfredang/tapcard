@@ -55,6 +55,10 @@ export async function updateUserPrefs(
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
-  const row = await prisma.user.update({ where: { id: userId }, data: parsed.data, select });
+  const row = await prisma.user.update({
+    where: { id: userId },
+    data: parsed.data,
+    select,
+  });
   return { prefs: normalize(row) };
 }

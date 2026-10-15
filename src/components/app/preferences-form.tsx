@@ -6,10 +6,30 @@ import { COUNTRY_CODES } from "@/lib/countries";
 import { toast } from "@/components/ui/toast";
 import type { UserPrefs, QrModeKey } from "@/lib/user-prefs";
 
-const QR_OPTIONS: { key: QrModeKey; label: string; hint: string; icon: typeof MessageCircle }[] = [
-  { key: "WHATSAPP", label: "WhatsApp", hint: "Scanning opens a WhatsApp chat with you", icon: MessageCircle },
-  { key: "LINKEDIN", label: "LinkedIn", hint: "Scanning opens your LinkedIn profile", icon: UserPlus },
-  { key: "CARD", label: "Card link", hint: "Scanning opens your digital card", icon: IdCard },
+const QR_OPTIONS: {
+  key: QrModeKey;
+  label: string;
+  hint: string;
+  icon: typeof MessageCircle;
+}[] = [
+  {
+    key: "WHATSAPP",
+    label: "WhatsApp",
+    hint: "Scanning opens a WhatsApp chat with you",
+    icon: MessageCircle,
+  },
+  {
+    key: "LINKEDIN",
+    label: "LinkedIn",
+    hint: "Scanning opens your LinkedIn profile",
+    icon: UserPlus,
+  },
+  {
+    key: "CARD",
+    label: "Card link",
+    hint: "Scanning opens your digital card",
+    icon: IdCard,
+  },
 ];
 
 /// Account preferences, saved on change. The same values are edited in the
@@ -45,7 +65,10 @@ export function PreferencesForm({ initial }: { initial: UserPrefs }) {
   return (
     <div className="space-y-5">
       <div>
-        <label htmlFor="countryCode" className="mb-1.5 block text-sm font-medium">
+        <label
+          htmlFor="countryCode"
+          className="mb-1.5 block text-sm font-medium"
+        >
           Default country code
         </label>
         <select
@@ -53,18 +76,20 @@ export function PreferencesForm({ initial }: { initial: UserPrefs }) {
           value={prefs.countryCode}
           disabled={saving}
           onChange={(e) => save({ countryCode: e.target.value })}
-          className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm sm:max-w-sm"
+          className="border-border bg-background w-full rounded-md border px-3 py-2 text-sm sm:max-w-sm"
         >
-          {!known && <option value={prefs.countryCode}>+{prefs.countryCode}</option>}
+          {!known && (
+            <option value={prefs.countryCode}>+{prefs.countryCode}</option>
+          )}
           {COUNTRY_CODES.map((c) => (
             <option key={c.code} value={c.code}>
               {c.flag} {c.name} (+{c.code})
             </option>
           ))}
         </select>
-        <p className="mt-1.5 text-xs text-muted-foreground">
-          Added to numbers on your card that don&apos;t start with +, so WhatsApp and
-          phone links work for anyone who scans your QR.
+        <p className="text-muted-foreground mt-1.5 text-xs">
+          Added to numbers on your card that don&apos;t start with +, so
+          WhatsApp and phone links work for anyone who scans your QR.
         </p>
       </div>
 
@@ -85,9 +110,11 @@ export function PreferencesForm({ initial }: { initial: UserPrefs }) {
                     : "border-border text-muted-foreground hover:border-primary/50"
                 }`}
               >
-                <o.icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <o.icon className="text-primary mt-0.5 h-4 w-4 shrink-0" />
                 <span>
-                  <span className="block font-medium text-foreground">{o.label}</span>
+                  <span className="text-foreground block font-medium">
+                    {o.label}
+                  </span>
                   <span className="text-xs">{o.hint}</span>
                 </span>
               </button>
@@ -96,7 +123,7 @@ export function PreferencesForm({ initial }: { initial: UserPrefs }) {
         </div>
       </div>
 
-      <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+      <p className="text-muted-foreground flex items-center gap-1.5 text-xs">
         <Smartphone className="h-3.5 w-3.5" /> Also in the Tapcard iOS app under
         Settings — changes sync both ways.
       </p>

@@ -40,6 +40,21 @@ export interface CardData {
   countryCode?: string | null;
 }
 
+/// The accent a card renders with. Empty — or one of the two violets the
+/// web builder and the iOS app used to stamp on every new card — means
+/// "match the design", so a theme's own accent shows unless the owner picked
+/// a colour on purpose. Mirrors the iOS app's BusinessCard.resolvedAccentHex.
+const LEGACY_DEFAULT_ACCENTS = new Set(["#7c5cff", "#6a47f5"]);
+export function resolveAccent(
+  accentColor: string | null | undefined,
+  themeAccent: string,
+) {
+  const value = (accentColor || "").trim().toLowerCase();
+  return !value || LEGACY_DEFAULT_ACCENTS.has(value)
+    ? themeAccent
+    : accentColor!;
+}
+
 export type SocialKey =
   | "linkedin"
   | "facebook"
