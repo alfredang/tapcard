@@ -26,7 +26,16 @@ const INITIAL_MODE: Record<string, QrMode> = {
   CARD: "card",
 };
 
-export function SharePanel({ card, qrMode }: { card: CardData; qrMode?: string }) {
+export function SharePanel({
+  card,
+  qrMode,
+  whatsappQr,
+}: {
+  card: CardData;
+  qrMode?: string;
+  /// The owner's WhatsApp contact link (wa.me/qr/…) from /settings, if set.
+  whatsappQr?: string;
+}) {
   const slug = card.slug!;
   const publicUrl = appUrl(`/c/${slug}`);
   const [mode, setMode] = useState<QrMode>(INITIAL_MODE[qrMode ?? ""] ?? "card");
@@ -40,7 +49,10 @@ export function SharePanel({ card, qrMode }: { card: CardData; qrMode?: string }
       case "save":
         return appUrl(`/api/c/${slug}/vcf`);
       case "whatsapp":
-        // Same hand-off the app's QR uses: the card page with ?wa=1 opens a
+        // With the owner's WhatsApp contact link on file, the QR is the same
+        // as WhatsApp's own: scanning adds them as a contact.
+        if (whatsappQr) return whatsappQr;
+        // Otherwise the same hand-off the app's QR uses: the card page with ?wa=1 opens a
         // WhatsApp chat to the owner, and falls back to the card itself when
         // the scanner has no WhatsApp.
         return whatsappNumber(card) ? `${publicUrl}?wa=1&src=qr` : publicUrl;
@@ -53,7 +65,7 @@ export function SharePanel({ card, qrMode }: { card: CardData; qrMode?: string }
       default:
         return publicUrl;
     }
-  }, [mode, slug, card, publicUrl]);
+  }, [mode, slug, card, publicUrl, whatsappQr]);
 
   useEffect(() => {
     let cancelled = false;

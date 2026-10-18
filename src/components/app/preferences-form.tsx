@@ -37,6 +37,7 @@ const QR_OPTIONS: {
 export function PreferencesForm({ initial }: { initial: UserPrefs }) {
   const [prefs, setPrefs] = useState(initial);
   const [saving, setSaving] = useState(false);
+  const [waLink, setWaLink] = useState(initial.whatsappQr);
 
   async function save(patch: Partial<UserPrefs>) {
     const previous = prefs;
@@ -51,9 +52,11 @@ export function PreferencesForm({ initial }: { initial: UserPrefs }) {
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.error || "Couldn't save");
       setPrefs(json.settings);
+      setWaLink(json.settings.whatsappQr);
       toast.success("Saved — synced to your app");
     } catch (e) {
       setPrefs(previous);
+      setWaLink(previous.whatsappQr);
       toast.error(e instanceof Error ? e.message : "Couldn't save");
     } finally {
       setSaving(false);
@@ -121,6 +124,35 @@ export function PreferencesForm({ initial }: { initial: UserPrefs }) {
             );
           })}
         </div>
+      </div>
+
+      <div>
+        <label
+          htmlFor="whatsappQr"
+          className="mb-1.5 block text-sm font-medium"
+        >
+          Your WhatsApp QR link
+        </label>
+        <input
+          id="whatsappQr"
+          type="text"
+          inputMode="url"
+          autoComplete="off"
+          placeholder="https://wa.me/qr/…"
+          value={waLink}
+          disabled={saving}
+          onChange={(e) => setWaLink(e.target.value)}
+          onBlur={() => {
+            if (waLink.trim() !== prefs.whatsappQr) save({ whatsappQr: waLink.trim() });
+          }}
+          className="border-border bg-background w-full rounded-md border px-3 py-2 text-sm sm:max-w-sm"
+        />
+        <p className="text-muted-foreground mt-1.5 text-xs">
+          Optional. In WhatsApp, open Settings → QR code → share, and paste the
+          link here. Your WhatsApp QR then adds you as a contact, just like
+          WhatsApp&apos;s own. Leave empty to open a chat with an intro message
+          instead.
+        </p>
       </div>
 
       <p className="text-muted-foreground flex items-center gap-1.5 text-xs">

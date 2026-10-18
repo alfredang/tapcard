@@ -116,9 +116,12 @@ model User {
   // Preferences edited from the iOS app's Settings and the web /settings page
   // (synced both ways). countryCode is the default dialling code applied to
   // local numbers ("96983731" → wa.me/6596983731); qrMode picks what the
-  // card's QR opens by default: WHATSAPP | LINKEDIN | CARD.
+  // card's QR opens by default: WHATSAPP | LINKEDIN | CARD. whatsappQr is
+  // the owner's WhatsApp contact link (https://wa.me/qr/…) — when set, the
+  // WhatsApp QR adds them as a contact like WhatsApp's own; "" = not set.
   countryCode   String    @default("65")
   qrMode        String    @default("WHATSAPP")
+  whatsappQr    String    @default("")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

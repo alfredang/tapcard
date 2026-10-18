@@ -16,6 +16,18 @@ export interface UserPrefs {
   countryCode: string;
   /// What the card's QR opens by default.
   qrMode: QrModeKey;
+  /// The owner's WhatsApp contact link ("https://wa.me/qr/…"), or "" when
+  /// unset. When set, the WhatsApp QR adds them as a contact, exactly like
+  /// the code in WhatsApp → QR code.
+  whatsappQr: string;
+}
+
+/// Pull a WhatsApp contact link out of whatever was pasted — WhatsApp's share
+/// text wraps it in a sentence — as "https://wa.me/qr/<code>". Null when the
+/// text holds none.
+export function whatsappQrLink(text: string): string | null {
+  const m = text.match(/(?:wa\.me|api\.whatsapp\.com)\/qr\/([A-Za-z0-9]+)/i);
+  return m ? `https://wa.me/qr/${m[1]}` : null;
 }
 
 export const prefsSchema = z
@@ -26,23 +38,44 @@ export const prefsSchema = z
       .transform((v) => v.replace(/^\+/, ""))
       .pipe(z.string().regex(/^[1-9]\d{0,3}$/, "Use a dialling code like 65")),
     qrMode: z.enum(QR_MODES),
+    // "" clears it.
+    whatsappQr: z
+      .string()
+      .trim()
+      .transform((v, ctx) => {
+        if (!v) return "";
+        const link = whatsappQrLink(v);
+        if (!link) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Paste the wa.me/qr link from WhatsApp → QR code",
+          });
+          return z.NEVER;
+        }
+        return link;
+      }),
   })
   .partial();
 
-const select = { countryCode: true, qrMode: true } as const;
+const select = { countryCode: true, qrMode: true, whatsappQr: true } as const;
 
-function normalize(row: { countryCode: string; qrMode: string }): UserPrefs {
+function normalize(row: {
+  countryCode: string;
+  qrMode: string;
+  whatsappQr: string;
+}): UserPrefs {
   return {
     countryCode: row.countryCode || "65",
     qrMode: (QR_MODES as readonly string[]).includes(row.qrMode)
       ? (row.qrMode as QrModeKey)
       : "WHATSAPP",
+    whatsappQr: row.whatsappQr || "",
   };
 }
 
 export async function getUserPrefs(userId: string): Promise<UserPrefs> {
   const row = await prisma.user.findUnique({ where: { id: userId }, select });
-  return normalize(row ?? { countryCode: "65", qrMode: "WHATSAPP" });
+  return normalize(row ?? { countryCode: "65", qrMode: "WHATSAPP", whatsappQr: "" });
 }
 
 /// Validate and apply a partial update. Returns the saved prefs, or an error

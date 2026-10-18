@@ -553,6 +553,7 @@ export function CardBuilder({
               <SharePanel
                 card={{ ...state, slug, countryCode: prefs?.countryCode }}
                 qrMode={prefs?.qrMode}
+                whatsappQr={prefs?.whatsappQr}
               />
             </Surface>
           ) : (
