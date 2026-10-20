@@ -13,7 +13,13 @@ import {
 } from "lucide-react";
 import { CardDesignBanner } from "./card-design-banner";
 import { getTheme } from "@/lib/themes";
-import { activeSocials, resolveAccent, type CardData, type SocialKey } from "@/lib/card";
+import {
+  activeSocials,
+  isLightColor,
+  resolveAccent,
+  type CardData,
+  type SocialKey,
+} from "@/lib/card";
 import { whatsappLink, telLink, mailtoLink, WHATSAPP_PRESETS } from "@/lib/whatsapp";
 import { initials } from "@/lib/utils";
 import {
@@ -70,6 +76,17 @@ export function CardView({
 }) {
   const t = getTheme(card.theme);
   const accent = resolveAccent(card.accentColor, t.accent);
+  // A colour picked on purpose restyles the button too; "match design" (or
+  // the design's own accent, as the theme gallery passes) keeps the
+  // design's own button.
+  const customAccent = accent.toLowerCase() !== t.accent.toLowerCase();
+  const button = customAccent
+    ? {
+        bg: accent,
+        text: isLightColor(accent) ? "#111111" : "#ffffff",
+        border: "transparent",
+      }
+    : { bg: t.buttonBg, text: t.buttonText, border: t.buttonBorder };
   const socials = activeSocials(card);
 
   const ext = (href: string) =>
@@ -273,9 +290,9 @@ export function CardView({
             onClick={() => onTrack?.("VCF_DOWNLOAD")}
             className="flex w-full items-center justify-center gap-2 rounded-full py-3.5 text-[15px] font-semibold shadow-xl transition hover:brightness-110 active:scale-[0.98]"
             style={{
-              background: t.buttonBg,
-              color: t.buttonText,
-              border: `1px solid ${t.buttonBorder}`,
+              background: button.bg,
+              color: button.text,
+              border: `1px solid ${button.border}`,
             }}
           >
             <UserPlus className="h-4 w-4" /> Save Contact

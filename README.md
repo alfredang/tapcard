@@ -40,7 +40,7 @@ relationship.
 
 |     | Feature              | Description                                                                                                              |
 | --- | -------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| 🪪  | **Card Builder**     | Canva-style 3-panel editor (content · live preview · design) with instant preview, autosave, 20 themes and accent colors. |
+| 🪪  | **Card Builder**     | Canva-style 3-panel editor (content · live preview · design) with instant preview, autosave, 20 themes and accent colors (a picked color also restyles the card's Save Contact button). |
 | 🌐  | **Public cards**     | Blinq-style, mobile-first card pages at `/c/<slug>` — 20 themes, one-detail-per-row layout (company, mobile & landline, maps-linked address), bio, full-screen QR, Save Contact, WhatsApp, socials and lead capture.       |
 | 📱  | **QR codes**         | Scan-to-WhatsApp (opens a chat with you, card underneath), LinkedIn, or open card — default set in Settings; plus save contact / email / website, color customization and PNG / SVG export. |
 | 📇  | **Save to Contacts** | One-tap vCard (VCF) export compatible with iPhone, Android, Google and Outlook.                                          |
@@ -49,7 +49,7 @@ relationship.
 | 🎯  | **Lead capture**     | Visitors leave their details straight from your card — leads flow into the CRM.                                          |
 | 📊  | **CRM**              | Contacts (CRUD, search, CSV export), leads inbox, and a drag-and-drop Kanban sales pipeline (7 stages).                  |
 | 📲  | **Mobile-first**     | The iOS and Android apps are the primary experience; on phones the web app uses the same bottom tabs (Home · Cards · Contacts · Planner · Settings) and Safari offers the App Store app. |
-| 🍎  | **iOS app**          | Tertiary Tapcard on the App Store — scan paper cards (single-shot, Apple Intelligence parsing), Apple/Google sign-in, QR sharing.                                                         |
+| 🍎  | **iOS app**          | Tertiary Tapcard on the App Store — scan your own paper card or other people's into Contacts (single-shot, Apple Intelligence parsing), Apple/Google sign-in, QR sharing.                                                         |
 | 🤖  | **Android app**      | Native Jetpack Compose companion ([tapcardapp_android](https://github.com/alfredang/tapcardapp_android)) — same synced settings, QR modes and 20 designs. |
 | 🤖  | **AI**               | Bio / about generation and lead scoring via the **Claude Agent SDK** (subscription — no API key).                        |
 | 📈  | **Analytics**        | Card views, QR scans, downloads and click tracking with an engagement dashboard.                                         |

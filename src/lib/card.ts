@@ -55,6 +55,17 @@ export function resolveAccent(
     : accentColor!;
 }
 
+/// Whether dark text reads better than white on a hex colour (relative
+/// luminance above ~0.55), for accents the owner picks freely. Mirrors the
+/// iOS app's Color.isLight(hex:).
+export function isLightColor(hex: string) {
+  let h = hex.trim().replace(/^#/, "");
+  if (h.length === 3) h = h.replace(/./g, "$&$&");
+  if (!/^[0-9a-f]{6}$/i.test(h)) return false;
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.55;
+}
+
 export type SocialKey =
   | "linkedin"
   | "facebook"
