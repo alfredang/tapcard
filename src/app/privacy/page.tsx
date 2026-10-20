@@ -9,6 +9,31 @@ export const metadata = {
 const UPDATED = "21 October 2026";
 const SUPPORT_EMAIL = "support@tertiaryinfotech.com";
 
+/** Mirrors the App Store "App Privacy" label — keep the two in step. */
+const APP_DATA: [string, string, string][] = [
+  [
+    "Contact info",
+    "Your name, email, phone numbers and address, for your account and card",
+    "App functionality",
+  ],
+  [
+    "Contacts",
+    "People you save, including business cards you scan",
+    "App functionality",
+  ],
+  [
+    "Photos",
+    "The profile photo, banner and logo you add to your card",
+    "App functionality",
+  ],
+  [
+    "Other user content",
+    "Your bio, notes, tasks and appointments",
+    "App functionality",
+  ],
+  ["Identifiers", "Your Tapcard account ID", "App functionality"],
+];
+
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="space-y-2">
@@ -97,6 +122,38 @@ export default function PrivacyPage() {
                 (such as device type and app version) needed to operate and secure the service.
               </li>
             </ul>
+          </Section>
+
+          <Section title="Data the apps collect, at a glance">
+            <p>
+              This is the same summary as the App Privacy section of our App Store listing. All of
+              it is linked to your account, used only to run Tapcard for you, and never used to
+              track you.
+            </p>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[480px] border-collapse text-left">
+                <thead>
+                  <tr className="border-b border-border text-foreground">
+                    <th className="py-2 pr-4 font-semibold">Data</th>
+                    <th className="py-2 pr-4 font-semibold">What it is</th>
+                    <th className="py-2 font-semibold">Used for</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {APP_DATA.map(([data, what, use]) => (
+                    <tr key={data} className="border-b border-border/60 align-top">
+                      <td className="py-2 pr-4 text-foreground">{data}</td>
+                      <td className="py-2 pr-4">{what}</td>
+                      <td className="py-2">{use}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p>
+              We do not track you across other companies&rsquo; apps or websites, we show no ads,
+              and we do not sell or share your data with data brokers.
+            </p>
           </Section>
 
           <Section title="What stays on your device">
