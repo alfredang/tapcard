@@ -54,6 +54,7 @@ relationship.
 | 🤖  | **AI**               | Bio / about generation and lead scoring via the **Claude Agent SDK** (subscription — no API key).                        |
 | 📈  | **Analytics**        | Card views, QR scans, downloads and click tracking with an engagement dashboard.                                         |
 | 🔐  | **Auth**             | Email + password, one-time email codes, and Google SSO. (Microsoft / LinkedIn SSO auto-enable when configured.) |
+| 🛡️  | **Privacy**          | [Privacy policy](https://tapcard.tertiaryinfotech.com/privacy) (PDPA) with an at-a-glance table matching the App Store privacy label; account deletion removes cards, contacts, leads, deals, tasks and appointments. |
 
 ---
 
