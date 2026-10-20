@@ -9,16 +9,20 @@ import { getMobileUserId } from "@/lib/mobile-auth";
 // Apple App Store Guideline 5.1.1(v) requires any app that supports account
 // creation to also let users initiate account *deletion* from within the app.
 // This endpoint deactivates and anonymizes the account so the user can no longer
-// sign back in and their personal data is removed/tombstoned, while keeping the
-// (now-anonymous) row for referential integrity of any CRM records referencing it.
+// sign back in, deletes everything they stored, and keeps only the (now-anonymous)
+// user row.
 //
 // What it does, in one transaction:
 //   1. deletes the user's published digital cards (and, by cascade, their
 //      analytics events; leads keep their row with cardId nulled),
-//   2. revokes any OAuth links + active sessions,
-//   3. tombstones the email (frees the original address for re-signup) and nulls
+//   2. deletes their CRM data — contacts (and, by cascade, their activities),
+//      leads, deals, tasks and appointments — which holds OTHER people's
+//      details (e.g. business cards they scanned), plus team memberships,
+//   3. revokes any OAuth links + active sessions,
+//   4. tombstones the email (frees the original address for re-signup), nulls
 //      name / image / emailVerified so neither Google nor OTP sign-in can reach
-//      the old account.
+//      the old account, and clears the Google Calendar token and WhatsApp link.
+// The privacy policy (/privacy) promises exactly this — keep the two in step.
 //
 // AUTH — two accepted proofs of ownership, checked in order:
 //   Path 1 (preferred): a valid `Authorization: Bearer <token>` — deletes THAT
@@ -36,11 +40,17 @@ const deleteSchema = z.object({
   email: z.string().trim().email("A valid email is required").optional(),
 });
 
-/** Deletes cards/accounts/sessions and tombstones the user, in one transaction. */
+/** Deletes the user's cards, CRM data and sign-ins and tombstones the user, in one transaction. */
 async function deleteAndTombstone(userId: string) {
   const tombstone = `deleted+${userId}@deleted.tapcard.invalid`;
   await prisma.$transaction([
     prisma.card.deleteMany({ where: { userId } }),
+    prisma.lead.deleteMany({ where: { userId } }),
+    prisma.deal.deleteMany({ where: { userId } }),
+    prisma.task.deleteMany({ where: { userId } }),
+    prisma.appointment.deleteMany({ where: { userId } }),
+    prisma.contact.deleteMany({ where: { userId } }),
+    prisma.membership.deleteMany({ where: { userId } }),
     prisma.account.deleteMany({ where: { userId } }),
     prisma.session.deleteMany({ where: { userId } }),
     prisma.user.update({
@@ -51,6 +61,9 @@ async function deleteAndTombstone(userId: string) {
         image: null,
         password: null,
         emailVerified: null,
+        googleCalRefresh: null,
+        googleCalEmail: null,
+        whatsappQr: "",
       },
     }),
   ]);

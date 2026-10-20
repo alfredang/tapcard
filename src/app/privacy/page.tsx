@@ -2,11 +2,12 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 export const metadata = {
-  title: "Privacy Policy — Tapcard",
+  title: "Privacy Policy",
   description: "How Tapcard collects, uses, and protects your information.",
 };
 
-const UPDATED = "8 July 2026";
+const UPDATED = "21 October 2026";
+const SUPPORT_EMAIL = "support@tertiaryinfotech.com";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -36,15 +37,33 @@ export default function PrivacyPage() {
             Tapcard (&ldquo;Tapcard&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;) provides a digital
             business card app and website that let you create, share, and manage smart contact
             cards. This Privacy Policy explains what information we collect, how we use it, and the
-            choices you have. By using Tapcard you agree to the practices described here.
+            choices you have. It covers the Tapcard website (tapcard.tertiaryinfotech.com) and the
+            Tapcard apps for iPhone and Android. By using Tapcard you agree to the practices
+            described here.
           </p>
+
+          <Section title="Who we are">
+            <p>
+              Tapcard is operated by{" "}
+              <span className="text-foreground">Tertiary Infotech Academy Pte Ltd</span> (UEN
+              201200696W), Singapore. We handle personal data in line with Singapore&rsquo;s
+              Personal Data Protection Act (PDPA). You can reach us at{" "}
+              <a
+                href={`mailto:${SUPPORT_EMAIL}`}
+                className="text-foreground underline underline-offset-4"
+              >
+                {SUPPORT_EMAIL}
+              </a>
+              .
+            </p>
+          </Section>
 
           <Section title="Information we collect">
             <ul className="list-disc space-y-1 pl-5">
               <li>
                 <span className="text-foreground">Account information</span> — your name, email
                 address, and a securely hashed password if you choose to set one. You can also
-                sign in with Google or a one-time code sent to your email, in which case no
+                sign in with Apple, Google or a one-time code sent to your email, in which case no
                 password is stored.
               </li>
               <li>
@@ -53,18 +72,66 @@ export default function PrivacyPage() {
                 any photos or logos you upload.
               </li>
               <li>
-                <span className="text-foreground">Contacts &amp; leads</span> — details of people you
-                save or that are captured when someone shares their information through your card.
+                <span className="text-foreground">Contacts &amp; leads</span> — details of other
+                people that you save: business cards you scan, QR codes you scan, contacts you type
+                in, and leads captured when someone shares their information through your card.
+                These can include a name, job title, company, email, phone and WhatsApp numbers,
+                address, website and your own notes.
               </li>
               <li>
-                <span className="text-foreground">Usage &amp; analytics</span> — anonymous events
-                such as card views, taps, and leads, used to show you how your cards perform.
+                <span className="text-foreground">Planner</span> — tasks, reminders and
+                appointments you create.
+              </li>
+              <li>
+                <span className="text-foreground">Preferences</span> — settings such as your
+                default dialling code, what your QR code opens, and your WhatsApp contact link.
+              </li>
+              <li>
+                <span className="text-foreground">Usage &amp; analytics</span> — events such as card
+                views, QR scans, taps and contact downloads, with the visitor&rsquo;s browser type and
+                referring page, used to show you how your cards perform. We do not record
+                visitors&rsquo; IP addresses with these events.
               </li>
               <li>
                 <span className="text-foreground">Device information</span> — basic technical data
                 (such as device type and app version) needed to operate and secure the service.
               </li>
             </ul>
+          </Section>
+
+          <Section title="What stays on your device">
+            <ul className="list-disc space-y-1 pl-5">
+              <li>
+                <span className="text-foreground">Card scanning</span> — when you scan a paper
+                business card, the camera image is read on your phone (text recognition and, where
+                available, Apple Intelligence). The photo itself is not uploaded; only the details
+                you review and save are sent to your account.
+              </li>
+              <li>
+                <span className="text-foreground">Apple Intelligence images</span> — banners and
+                profile photos created with Image Playground are generated on your iPhone. A
+                picture you choose to use is stored with your card like any photo you upload.
+              </li>
+              <li>
+                <span className="text-foreground">Face ID</span> — the optional Face ID lock is
+                handled by iOS. We never receive your face data.
+              </li>
+              <li>
+                <span className="text-foreground">Camera &amp; photos</span> — the apps ask for
+                camera or photo access only to scan cards and QR codes or to pick a photo for your
+                card, and use it only when you do so.
+              </li>
+            </ul>
+          </Section>
+
+          <Section title="Other people&rsquo;s details">
+            <p>
+              When you save someone&rsquo;s business card or details to Contacts, you are
+              responsible for having a reason to keep them, such as a business introduction. We
+              store those contacts only for you, use them only to provide the service to you, and
+              never sell them or use them to contact the people concerned. If your details were
+              saved by a Tapcard user and you want them removed, email us and we will help.
+            </p>
           </Section>
 
           <Section title="How we use your information">
@@ -89,8 +156,18 @@ export default function PrivacyPage() {
               </li>
               <li>
                 <span className="text-foreground">Service providers</span> — trusted vendors (such as
-                hosting and database providers) that process data on our behalf under confidentiality
-                obligations.
+                hosting, database and email-delivery providers) that process data on our behalf under
+                confidentiality obligations.
+              </li>
+              <li>
+                <span className="text-foreground">AI features</span> — when you use an AI feature on
+                the website or in the apps, such as writing your bio or summarising a lead, the text
+                it needs is sent to our AI provider, Anthropic, to produce the result. Card scanning
+                and Apple Intelligence features run on your device and are not sent.
+              </li>
+              <li>
+                <span className="text-foreground">Sign-in providers</span> — if you sign in with
+                Apple or Google, they confirm your identity to us under their own privacy policies.
               </li>
               <li>
                 <span className="text-foreground">Legal reasons</span> — when required by law or to
@@ -103,9 +180,10 @@ export default function PrivacyPage() {
             <p>
               We keep your information for as long as your account is active. You can delete your
               account at any time from <span className="text-foreground">Settings &rarr; Delete
-              account</span> in the app. Deleting your account removes your cards and analytics and
-              anonymizes your account so it can no longer be signed into. Some records may be retained
-              in anonymized form where required for legitimate business or legal purposes.
+              account</span> in the app. Deleting your account removes your cards and their
+              analytics, your contacts, leads, deals, tasks and appointments, and your sign-in
+              links, and anonymizes your account so it can no longer be signed into. Server backups
+              are overwritten on a rolling basis. To ask for deletion another way, email us.
             </p>
           </Section>
 
@@ -142,8 +220,14 @@ export default function PrivacyPage() {
 
           <Section title="Contact us">
             <p>
-              If you have questions about this Privacy Policy or your data, please reach out through
-              our{" "}
+              If you have questions about this Privacy Policy or your data, email{" "}
+              <a
+                href={`mailto:${SUPPORT_EMAIL}`}
+                className="text-foreground underline underline-offset-4"
+              >
+                {SUPPORT_EMAIL}
+              </a>{" "}
+              or visit our{" "}
               <Link href="/help" className="text-foreground underline underline-offset-4">
                 Help &amp; Support
               </Link>{" "}
