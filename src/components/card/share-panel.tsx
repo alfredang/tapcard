@@ -5,7 +5,7 @@ import { Copy, Check, Download, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { qrDataUrl, qrSvg } from "@/lib/qr";
 import { appUrl } from "@/lib/utils";
-import { whatsappNumber, linkedinUrl, mailtoLink } from "@/lib/whatsapp";
+import { whatsappChatQr, whatsappNumber, linkedinUrl, mailtoLink } from "@/lib/whatsapp";
 import type { CardData } from "@/lib/card";
 
 type QrMode = "card" | "save" | "whatsapp" | "linkedin" | "email" | "website";
@@ -52,10 +52,12 @@ export function SharePanel({
         // With the owner's WhatsApp contact link on file, the QR is the same
         // as WhatsApp's own: scanning adds them as a contact.
         if (whatsappQr) return whatsappQr;
-        // Otherwise the same hand-off the app's QR uses: the card page with ?wa=1 opens a
-        // WhatsApp chat to the owner, and falls back to the card itself when
-        // the scanner has no WhatsApp.
-        return whatsappNumber(card) ? `${publicUrl}?wa=1&src=qr` : publicUrl;
+        // Otherwise wa.me itself (same as the app's QR), so both WhatsApp's
+        // scanner and the phone camera open a chat with the owner.
+        return (
+          whatsappChatQr(whatsappNumber(card), card.fullName, card.countryCode) ||
+          publicUrl
+        );
       case "linkedin":
         return linkedinUrl(card.linkedin) || publicUrl;
       case "email":

@@ -79,6 +79,29 @@ export function whatsappLink(
   return message ? `${base}?text=${encodeURIComponent(message)}` : base;
 }
 
+/// What a "chat on WhatsApp" QR encodes: wa.me itself with a short intro.
+/// It must be wa.me — WhatsApp's own scanner rejects any other URL, and a
+/// scripted redirect from the card page doesn't open the app on iOS. Short so
+/// the code stays easy to scan under the logo. Mirrors the iOS app's
+/// CardQRTarget.chatURL.
+const HONORIFICS = new Set(["dr", "mr", "mrs", "ms", "mdm", "miss", "prof", "er", "ir"]);
+
+export function whatsappChatQr(
+  phone?: string | null,
+  fullName?: string | null,
+  countryCode?: string | null,
+) {
+  const num = internationalDigits(phone, countryCode);
+  if (!num) return "";
+  const first =
+    (fullName || "")
+      .trim()
+      .split(/\s+/)
+      .find((w) => w && !HONORIFICS.has(w.toLowerCase().replace(/\./g, ""))) || "";
+  const intro = first ? `Hi ${first}, I scanned your Tapcard.` : "Hi, I scanned your Tapcard.";
+  return `https://wa.me/${num}?text=${encodeURIComponent(intro)}`;
+}
+
 /// The number a card is reached on over WhatsApp: the WhatsApp field, else
 /// mobile, else the office line. Matches the iOS app's WhatsAppLink.number.
 export function whatsappNumber(card: {

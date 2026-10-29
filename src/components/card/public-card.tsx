@@ -23,7 +23,9 @@ export function PublicCard({ card }: { card: CardData }) {
   // Arrived from a "connect on WhatsApp" QR (?wa=1). We hand off to wa.me and
   // keep the card underneath, so a visitor without WhatsApp still lands on the
   // full card instead of a dead-end App Store page.
-  const [waHandoff, setWaHandoff] = useState(false);
+  // The wa.me link itself, for the "Open WhatsApp" button: iOS only opens
+  // the app from a tap, not from the scripted redirect below.
+  const [waHandoff, setWaHandoff] = useState<string>();
 
   // Render the QR lazily, the first time the modal opens.
   useEffect(() => {
@@ -57,7 +59,7 @@ export function PublicCard({ card }: { card: CardData }) {
       card.countryCode,
     );
     if (!target) return;
-    setWaHandoff(true);
+    setWaHandoff(target);
     track(slug, "WHATSAPP_CLICK", { src: "qr" });
     const timer = setTimeout(() => {
       window.location.href = target;
@@ -103,8 +105,15 @@ export function PublicCard({ card }: { card: CardData }) {
             style={{ background: t.chipBg, color: t.text, border: `1px solid ${t.cardBorder}` }}
           >
             <p className="font-medium">Opening WhatsApp…</p>
-            <p className="mt-1 text-xs opacity-70">
-              Nothing happened? WhatsApp may not be installed — save the contact below instead.
+            <a
+              href={waHandoff}
+              className="mt-2 inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold"
+              style={{ background: "#25D366", color: "#fff" }}
+            >
+              Open WhatsApp chat
+            </a>
+            <p className="mt-2 text-xs opacity-70">
+              No WhatsApp? Save the contact below instead.
             </p>
           </div>
         )}
