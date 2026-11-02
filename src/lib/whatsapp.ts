@@ -98,7 +98,9 @@ export function whatsappChatQr(
       .trim()
       .split(/\s+/)
       .find((w) => w && !HONORIFICS.has(w.toLowerCase().replace(/\./g, ""))) || "";
-  const intro = first ? `Hi ${first}, I scanned your Tapcard.` : "Hi, I scanned your Tapcard.";
+  const intro = first
+    ? `Hi ${first}, I have added your contact to my WhatsApp.`
+    : "Hi, I have added your contact to my WhatsApp.";
   return `https://wa.me/${num}?text=${encodeURIComponent(intro)}`;
 }
 
@@ -136,9 +138,7 @@ export const WHATSAPP_PRESETS = {
       cardUrl?: string;
     },
   ) => {
-    let text = `Hi${name ? ` ${name}` : ""}, I scanned your Tapcard`;
-    if (opts?.company) text += ` at ${opts.company}`;
-    text += " — I'd like to connect.";
+    let text = `Hi${name ? ` ${name}` : ""}, I have added your contact to my WhatsApp.`;
     const li = linkedinUrl(opts?.linkedin);
     if (li) text += `\n\nLinkedIn: ${li}`;
     if (opts?.cardUrl) text += `\nCard: ${opts.cardUrl}`;

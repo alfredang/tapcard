@@ -42,7 +42,7 @@ relationship.
 | --- | -------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | 🪪  | **Card Builder**     | Canva-style 3-panel editor (content · live preview · design) with instant preview, autosave, 20 themes and accent colors (a picked color also restyles the card's Save Contact button). |
 | 🌐  | **Public cards**     | Blinq-style, mobile-first card pages at `/c/<slug>` — 20 themes, one-detail-per-row layout (company, mobile & landline, maps-linked address), bio, full-screen QR, Save Contact, WhatsApp, socials and lead capture.       |
-| 📱  | **QR codes**         | Scan-to-WhatsApp (opens a chat with you, card underneath), LinkedIn, or open card — default set in Settings; plus save contact / email / website, color customization and PNG / SVG export. |
+| 📱  | **QR codes**         | Scan-to-WhatsApp (opens a chat with you, pre-filled with "Hi Alfred, I have added your contact to my WhatsApp."), LinkedIn, or open card — default set in Settings; plus save contact / email / website, color customization and PNG / SVG export. |
 | 📇  | **Save to Contacts** | One-tap vCard (VCF) export compatible with iPhone, Android, Google and Outlook.                                          |
 | 💬  | **WhatsApp**         | Message, request-a-quote and share deep links. Local numbers get the account's country code (`9698 3731` → `wa.me/6596983731`), so links never hit WhatsApp's "invalid number" error. |
 | ⚙️  | **Synced settings**  | Country code, default QR and card design are edited in the mobile apps (or `/settings`) and sync both ways via `/api/mobile/settings`. |
