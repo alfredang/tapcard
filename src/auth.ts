@@ -54,6 +54,8 @@ const oauthProviders = [];
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   oauthProviders.push(
     Google({
+      // Always show Google's account chooser (users have personal + work accounts).
+      authorization: { params: { prompt: "select_account" } },
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       allowDangerousEmailAccountLinking: true,
