@@ -147,6 +147,28 @@ const config: NextAuthConfig = {
       return session;
     },
   },
+  events: {
+    // Auth.js stores a provider's tokens only when it first links the
+    // account. Reconnecting LinkedIn (its tokens last 60 days) must refresh
+    // them, or "Use my LinkedIn photo" keeps failing with the expired one.
+    async signIn({ account }) {
+      if (account?.provider !== "linkedin" || !account.access_token) return;
+      await prisma.account
+        .updateMany({
+          where: {
+            provider: "linkedin",
+            providerAccountId: account.providerAccountId,
+          },
+          data: {
+            access_token: account.access_token,
+            expires_at: account.expires_at ?? null,
+            id_token: account.id_token ?? null,
+            scope: account.scope ?? null,
+          },
+        })
+        .catch(() => {});
+    },
+  },
 };
 
 export const { handlers, auth, signIn, signOut } = NextAuth(config);

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import { CardBuilder } from "@/components/builder/card-builder";
 import { getUserPrefs } from "@/lib/user-prefs";
+import { enabledOAuth } from "@/auth";
 
 export const metadata = { title: "Edit Card — Tapcard" };
 
@@ -21,5 +22,13 @@ export default async function EditCardPage({
     card;
 
   const prefs = await getUserPrefs(user.id);
-  return <CardBuilder cardId={card.id} initialCard={rest} prefs={prefs} />;
+  return (
+    <CardBuilder
+      cardId={card.id}
+      initialCard={rest}
+      version={card.updatedAt.toISOString()}
+      prefs={prefs}
+      linkedinEnabled={enabledOAuth.linkedin}
+    />
+  );
 }

@@ -35,6 +35,10 @@ const optionalEmail = z
   .or(z.literal(""))
   .nullish();
 
+// Derived from the theme registry so new templates are accepted without
+// touching this file (a hardcoded 6-value enum silently rejected the rest).
+const themeSchema = z.enum(Object.keys(THEMES) as [ThemeKey, ...ThemeKey[]]);
+
 export const cardSchema = z.object({
   fullName: z.string().trim().min(1, "Full name is required").max(120),
   jobTitle: optionalStr,
@@ -63,11 +67,7 @@ export const cardSchema = z.object({
   companyLogo: optionalImage,
   coverBanner: optionalImage,
 
-  // Derived from the theme registry so new templates are accepted without
-  // touching this file (a hardcoded 6-value enum silently rejected the rest).
-  theme: z
-    .enum(Object.keys(THEMES) as [ThemeKey, ...ThemeKey[]])
-    .default("MODERN"),
+  theme: themeSchema.default("MODERN"),
   accentColor: z
     .string()
     .regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, "Use a hex color")
@@ -77,6 +77,14 @@ export const cardSchema = z.object({
 });
 
 export type CardInput = z.infer<typeof cardSchema>;
+
+/// For PATCH: only the fields sent. Never `cardSchema.partial()` — Zod 4
+/// still fills in `.default()`s under partial(), so every update that left
+/// out `theme` (the app's changed-fields saves, a LinkedIn photo…) reset the
+/// card's design to MODERN.
+export const cardUpdateSchema = cardSchema
+  .extend({ theme: themeSchema.optional() })
+  .partial();
 
 export const leadSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(120),

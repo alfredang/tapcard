@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { cardSchema } from "@/lib/validators";
+import { cardUpdateSchema } from "@/lib/validators";
 import { appUrl } from "@/lib/utils";
 import { getMobileUserId } from "@/lib/mobile-auth";
 
@@ -22,7 +22,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
   }
 
   const body = await req.json().catch(() => null);
-  const parsed = cardSchema.partial().safeParse(body);
+  const parsed = cardUpdateSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
       { error: parsed.error.issues[0]?.message ?? "Invalid input" },

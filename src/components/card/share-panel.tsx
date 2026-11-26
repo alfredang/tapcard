@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { Copy, Check, Download, QrCode } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Copy, Check, Download, QrCode, ZoomIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { qrDataUrl, qrSvg } from "@/lib/qr";
 import { appUrl } from "@/lib/utils";
 import { whatsappChatQr, whatsappNumber, linkedinUrl, mailtoLink } from "@/lib/whatsapp";
 import type { CardData } from "@/lib/card";
+import { QrZoom } from "@/components/card/qr-zoom";
 
 type QrMode = "card" | "save" | "whatsapp" | "linkedin" | "email" | "website";
 
@@ -43,6 +44,7 @@ export function SharePanel({
   const [light, setLight] = useState("#ffffff");
   const [png, setPng] = useState<string>("");
   const [copied, setCopied] = useState(false);
+  const [zoom, setZoom] = useState(false);
 
   const payload = useMemo(() => {
     switch (mode) {
@@ -69,6 +71,41 @@ export function SharePanel({
     }
   }, [mode, slug, card, publicUrl, whatsappQr]);
 
+  // What the full-screen view says about the QR on show, and a nudge when
+  // the field it needs isn't on the card (the QR then opens the card).
+  const first =
+    (card.fullName || "").trim().split(/\s+/).find((w) =>
+      !/^(dr|mr|mrs|ms|mdm|miss|prof)\.?$/i.test(w),
+    ) || "";
+  const who = first ? ` with ${first}` : "";
+  const zoomText = ((): { subtitle: string; hint?: string } => {
+    switch (mode) {
+      case "whatsapp":
+        if (whatsappQr) return { subtitle: "Scan to add me on WhatsApp" };
+        return whatsappNumber(card)
+          ? { subtitle: `Scan to chat${who} on WhatsApp` }
+          : { subtitle: "Scan to open my card", hint: "Add a WhatsApp or mobile number to the card for a WhatsApp QR." };
+      case "linkedin":
+        return linkedinUrl(card.linkedin)
+          ? { subtitle: `Scan to connect${who} on LinkedIn` }
+          : { subtitle: "Scan to open my card", hint: "Add your LinkedIn profile to the card for a LinkedIn QR." };
+      case "save":
+        return { subtitle: "Scan to save my contact" };
+      case "email":
+        return card.email
+          ? { subtitle: "Scan to email me" }
+          : { subtitle: "Scan to open my card", hint: "Add an email to the card for an email QR." };
+      case "website":
+        return card.website
+          ? { subtitle: "Scan to visit my website" }
+          : { subtitle: "Scan to open my card", hint: "Add a website to the card for a website QR." };
+      default:
+        return { subtitle: "Scan to open my digital card" };
+    }
+  })();
+  const modeLabel = MODES.find((m) => m.key === mode)?.label ?? "";
+  const zoomTitle = [card.fullName, modeLabel].filter(Boolean).join(" · ");
+
   useEffect(() => {
     let cancelled = false;
     qrDataUrl(payload, { dark, light, width: 320 }).then((url) => {
@@ -78,6 +115,8 @@ export function SharePanel({
       cancelled = true;
     };
   }, [payload, dark, light]);
+
+  const closeZoom = useCallback(() => setZoom(false), []);
 
   async function copyLink() {
     await navigator.clipboard.writeText(publicUrl);
@@ -105,13 +144,23 @@ export function SharePanel({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col items-center gap-3 rounded-lg border border-border bg-surface-2/40 p-4">
+      <div className="relative flex flex-col items-center gap-3 rounded-lg border border-border bg-surface-2/40 p-4">
+        <button
+          type="button"
+          onClick={() => setZoom(true)}
+          aria-label="Show QR full screen"
+          title="Show full screen"
+          className="border-border bg-surface text-primary hover:bg-primary/10 absolute top-2 right-2 flex h-9 w-9 items-center justify-center rounded-lg border shadow-sm transition"
+        >
+          <ZoomIn className="h-5 w-5" />
+        </button>
         {png ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={png}
             alt="QR code"
-            className="h-40 w-40 rounded-lg bg-white p-2"
+            onClick={() => setZoom(true)}
+            className="h-40 w-40 cursor-zoom-in rounded-lg bg-white p-2"
           />
         ) : (
           <div className="flex h-40 w-40 items-center justify-center text-muted-foreground">
@@ -185,6 +234,20 @@ export function SharePanel({
           )}
         </button>
       </div>
+
+      <QrZoom
+        open={zoom}
+        onClose={closeZoom}
+        payload={payload}
+        title={zoomTitle}
+        subtitle={zoomText.subtitle}
+        hint={zoomText.hint}
+        dark={dark}
+        light={light}
+        modes={MODES}
+        mode={mode}
+        onModeChange={(k) => setMode(k as QrMode)}
+      />
     </div>
   );
 }

@@ -12,6 +12,7 @@ import {
   type ChangeEvent,
 } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import {
   Check,
   Loader2,
@@ -21,6 +22,8 @@ import {
   Globe2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LinkedInIcon } from "@/components/icons/brand";
+import { linkedinUrl } from "@/lib/whatsapp";
 import { Surface, Badge } from "@/components/ui/card";
 import { Section, TextField, AreaField } from "@/components/builder/fields";
 import { AiButton } from "@/components/builder/ai-button";
@@ -44,6 +47,47 @@ const EMPTY: BuilderState = {
 };
 
 type SaveStatus = "idle" | "saving" | "saved" | "error";
+
+// ─── Two-way sync with the app ──────────────────────────────────────────────
+// The app edits the same card (design, accent, photo, banner…). The builder
+// keeps `baseline` — the card as the server last told us — and:
+//  • saves only the fields the owner changed here (a stale tab can't put back
+//    the old design the app just set), and
+//  • polls the server on focus and every 15 s, taking every field the owner
+//    hasn't touched here. Mirrors the iOS app's cardChanges/applying (1.6.9).
+const NOT_SYNCED = new Set([
+  "id", "slug", "countryCode", "userId", "gallery", "createdAt", "updatedAt",
+]);
+const POLL_MS = 15_000;
+
+function same(a: unknown, b: unknown) {
+  const norm = (v: unknown) =>
+    v === null || v === undefined
+      ? ""
+      : typeof v === "object"
+        ? JSON.stringify(v)
+        : v;
+  return norm(a) === norm(b);
+}
+
+function changedFields(next: BuilderState, base: BuilderState) {
+  const out: Record<string, unknown> = {};
+  const n = next as unknown as Record<string, unknown>;
+  const b = base as unknown as Record<string, unknown>;
+  for (const k of new Set([...Object.keys(n), ...Object.keys(b)])) {
+    if (NOT_SYNCED.has(k)) continue;
+    if (!same(n[k], b[k])) out[k] = n[k] ?? null;
+  }
+  return out;
+}
+
+function syncedFields(card: Record<string, unknown>) {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(card)) {
+    if (!NOT_SYNCED.has(k)) out[k] = v;
+  }
+  return out as Partial<BuilderState>;
+}
 
 /**
  * Reads an image File, downscales it to fit maxDim px on a canvas, and returns a
@@ -158,10 +202,16 @@ function ImageField({
 export function CardBuilder({
   initialCard,
   cardId: initialId,
+  version: initialVersion,
   prefs,
+  linkedinEnabled = false,
 }: {
   initialCard?: BuilderState;
   cardId?: string;
+  /// The card's updatedAt (ISO) as loaded — the poll asks "changed since?".
+  version?: string;
+  /// Whether "Sign In with LinkedIn" is configured, for the photo import.
+  linkedinEnabled?: boolean;
   /// The account's synced preferences (country code for phone links, default
   /// QR mode) — shared with the iOS app's Settings.
   prefs?: UserPrefs;
@@ -176,6 +226,15 @@ export function CardBuilder({
   const [confirmDel, setConfirmDel] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const firstRender = useRef(true);
+  const baseline = useRef<BuilderState>(initialCard ?? EMPTY);
+  const version = useRef<string | undefined>(initialVersion);
+  const saveGen = useRef(0);
+  const pulling = useRef(false);
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const stateRef = useRef(state);
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
   const needsName = !state.fullName?.trim();
 
   const set = useCallback(
@@ -187,15 +246,23 @@ export function CardBuilder({
   const persist = useCallback(
     async (next: BuilderState) => {
       if (!next.fullName?.trim()) return;
+      const changes = cardId ? changedFields(next, baseline.current) : null;
+      if (changes && Object.keys(changes).length === 0) return;
+      saveGen.current += 1;
       setStatus("saving");
       try {
-        if (cardId) {
+        if (cardId && changes) {
           const res = await fetch(`/api/cards/${cardId}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(next),
+            body: JSON.stringify(changes),
           });
           if (!res.ok) throw new Error();
+          const { card } = await res.json();
+          baseline.current = { ...baseline.current, ...changes } as BuilderState;
+          // Don't adopt card.updatedAt: the next poll then re-reads the card
+          // once, picking up anything the app saved just before this PATCH.
+          void card;
         } else {
           const res = await fetch("/api/cards", {
             method: "POST",
@@ -204,6 +271,8 @@ export function CardBuilder({
           });
           if (!res.ok) throw new Error();
           const { card } = await res.json();
+          baseline.current = { ...next, ...syncedFields(card) };
+          version.current = card.updatedAt;
           setCardId(card.id);
           setSlug(card.slug);
           window.history.replaceState(null, "", `/cards/${card.id}/edit`);
@@ -215,6 +284,118 @@ export function CardBuilder({
     },
     [cardId],
   );
+
+  // Take the server's copy of every field the owner hasn't changed here.
+  // Returns whether anything on screen changed.
+  const applyServer = useCallback((card: Record<string, unknown>) => {
+    const server = syncedFields(card);
+    const base = { ...baseline.current } as unknown as Record<string, unknown>;
+    const cur = stateRef.current as unknown as Record<string, unknown>;
+    const incoming = Object.entries(server).filter(
+      ([k, v]) => same(cur[k], base[k]) && !same(cur[k], v),
+    );
+    baseline.current = { ...baseline.current, ...server };
+    if (typeof card.updatedAt === "string") version.current = card.updatedAt;
+    if (incoming.length === 0) return false;
+    setState((s) => {
+      const merged = { ...s } as unknown as Record<string, unknown>;
+      for (const [k, v] of incoming) if (same(merged[k], base[k])) merged[k] = v;
+      return merged as unknown as BuilderState;
+    });
+    return true;
+  }, []);
+
+  const pull = useCallback(async () => {
+    if (!cardId || pulling.current) return;
+    if (document.visibilityState !== "visible") return;
+    pulling.current = true;
+    const gen = saveGen.current;
+    try {
+      const since = version.current
+        ? `?since=${encodeURIComponent(version.current)}`
+        : "";
+      const res = await fetch(`/api/cards/${cardId}${since}`, {
+        cache: "no-store",
+      });
+      if (res.status !== 200) return;
+      const { card } = await res.json();
+      // A save started meanwhile: this copy may predate it — skip it, the
+      // next poll reads the card again.
+      if (gen !== saveGen.current) return;
+      if (applyServer(card)) {
+        toast.info("Updated with changes from the Tapcard app");
+      }
+    } catch {
+      /* offline — try again on the next poll */
+    } finally {
+      pulling.current = false;
+    }
+  }, [cardId, applyServer]);
+
+  useEffect(() => {
+    if (!cardId) return;
+    const onWake = () => void pull();
+    window.addEventListener("focus", onWake);
+    document.addEventListener("visibilitychange", onWake);
+    const t = setInterval(onWake, POLL_MS);
+    return () => {
+      window.removeEventListener("focus", onWake);
+      document.removeEventListener("visibilitychange", onWake);
+      clearInterval(t);
+    };
+  }, [cardId, pull]);
+
+  // Profile photo from LinkedIn (the server reads it through the owner's
+  // LinkedIn connection). Not connected yet → connect, then come back here
+  // with ?linkedinPhoto=1 to finish the import.
+  const importLinkedInPhoto = useCallback(async () => {
+    if (!cardId) return;
+    setPhotoBusy(true);
+    try {
+      const res = await fetch(`/api/cards/${cardId}/linkedin-photo`, {
+        method: "POST",
+      });
+      const body = await res.json().catch(() => ({}));
+      if (res.ok && body.card) {
+        const photo = body.card.profilePhoto as string;
+        baseline.current = { ...baseline.current, profilePhoto: photo };
+        setState((s) => ({ ...s, profilePhoto: photo }));
+        toast.success("Profile photo updated from LinkedIn");
+        return;
+      }
+      if (body.connect && linkedinEnabled) {
+        await signIn("linkedin", {
+          redirectTo: `/cards/${cardId}/edit?linkedinPhoto=1`,
+        });
+        return;
+      }
+      if (body.connect) {
+        toast.error(
+          "LinkedIn sign-in isn't switched on for this site yet. Save your LinkedIn photo and upload it instead.",
+        );
+        const profile = linkedinUrl(state.linkedin);
+        if (profile) window.open(profile, "_blank", "noopener");
+        return;
+      }
+      toast.error(body.error || "Couldn't import your LinkedIn photo");
+    } finally {
+      setPhotoBusy(false);
+    }
+  }, [cardId, linkedinEnabled, state.linkedin]);
+
+  useEffect(() => {
+    if (!cardId) return;
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("linkedinPhoto") !== "1") return;
+    const t = setTimeout(() => {
+      url.searchParams.delete("linkedinPhoto");
+      window.history.replaceState(null, "", url.pathname + url.search);
+      void importLinkedInPhoto();
+    }, 0);
+    return () => clearTimeout(t);
+    // Run once, on the return from LinkedIn.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cardId]);
 
   // Debounced autosave whenever state changes.
   useEffect(() => {
@@ -303,6 +484,21 @@ export function CardBuilder({
               onChange={set("profilePhoto")}
               placeholder="https://…/photo.jpg — or upload below"
             />
+            {cardId && (
+              <button
+                type="button"
+                onClick={importLinkedInPhoto}
+                disabled={photoBusy}
+                className="flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-sm hover:bg-surface-2 disabled:opacity-50"
+              >
+                {photoBusy ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <LinkedInIcon className="h-4 w-4" />
+                )}
+                Use my LinkedIn photo
+              </button>
+            )}
             <ImageField
               label="Company logo"
               value={state.companyLogo ?? ""}
